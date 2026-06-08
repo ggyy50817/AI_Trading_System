@@ -2,7 +2,7 @@ from logs.trade_logger import log_trade
 from config.settings import BOT_MODE
 from scanner.bingx_vst_api import safe_demo_order_test
 from logs.logger import log_message
-from scanner.ai_score import calculate_ai_score
+from scanner.ai_score import calculate_ai_score, calculate_short_ai_score
 from scanner.entry_filter import check_entry_permission
 from telegram_utils.telegram_bot import send_telegram_message
 
@@ -31,12 +31,15 @@ def run_scanner():
 
             ai_score = calculate_ai_score(symbol)
 
+            short_score = calculate_short_ai_score(symbol)
+
         except Exception as e:
 
             log_message(f"❌ {symbol} 掃描失敗：{e}")
             continue
 
-        log_message(f"🧠 {symbol} AI Score: {ai_score}")
+            log_message(f"🧠 {symbol} LONG AI Score: {ai_score}")
+            log_message(f"🧠 {symbol} SHORT AI Score: {short_score}")
 
         can_enter = check_entry_permission(ai_score)
 
