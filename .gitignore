@@ -1,0 +1,23 @@
+# Environment
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+
+# Trading Logs
+trading_log.csv
+trading_log_old.csv
+
+# Cursor
+.cursor/
+
+# VSCode
+.vscode/
+
+# Windows
+Thumbs.db
+Desktop.ini
