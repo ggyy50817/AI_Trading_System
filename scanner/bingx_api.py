@@ -158,9 +158,12 @@ def check_funding_condition(funding_percent):
 
 def klines_to_dataframe(klines):
 
-    data = klines["data"]
+    data = klines.get("data", [])
 
     df = pd.DataFrame(data)
+
+    if df.empty:
+        raise ValueError("K線資料為空")
 
     df = df.rename(columns={
         "open": "Open",
@@ -170,6 +173,29 @@ def klines_to_dataframe(klines):
         "volume": "Volume",
         "time": "Time"
     })
+
+    required_columns = [
+        "Open",
+        "Close",
+        "High",
+        "Low",
+        "Volume"
+    ]
+
+    missing_columns = []
+
+    for column in required_columns:
+        if column not in df.columns:
+            missing_columns.append(column)
+
+    if missing_columns:
+        print("❌ K線欄位缺失：")
+        print(missing_columns)
+        print("原始欄位：")
+        print(df.columns.tolist())
+        print("原始資料前3筆：")
+        print(df.head(3))
+        raise ValueError(f"K線缺少必要欄位：{missing_columns}")
 
     df["Open"] = df["Open"].astype(float)
     df["Close"] = df["Close"].astype(float)
@@ -195,8 +221,6 @@ def klines_to_dataframe(klines):
     )
 
     return df
-
-
 def check_above_ma20(df):
 
     latest_close = df.iloc[-1]["Close"]

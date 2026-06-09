@@ -1,6 +1,6 @@
 from logs.trade_logger import log_trade
 from config.settings import BOT_MODE
-from scanner.bingx_vst_api import safe_demo_order_test
+from scanner.bingx_vst_api import safe_demo_order_test, has_existing_position
 from logs.logger import log_message
 from scanner.ai_score import calculate_ai_score, calculate_short_ai_score
 from scanner.entry_filter import check_entry_permission
@@ -14,10 +14,11 @@ WATCHLIST = [
     "XRP-USDT",
     "DOGE-USDT",
     "SUI-USDT",
-    "PEPE-USDT",
+    # "PEPE-USDT",
     "LINK-USDT",
     "AVAX-USDT"
 ]
+
 
 def run_scanner():
 
@@ -28,29 +29,58 @@ def run_scanner():
         log_message(f"🔎 正在掃描：{symbol}")
 
         try:
-
             ai_score = calculate_ai_score(symbol)
-
             short_score = calculate_short_ai_score(symbol)
 
         except Exception as e:
-
             log_message(f"❌ {symbol} 掃描失敗：{e}")
             continue
 
-            log_message(f"🧠 {symbol} LONG AI Score: {ai_score}")
-            log_message(f"🧠 {symbol} SHORT AI Score: {short_score}")
+        log_message(f"🧠 {symbol} LONG AI Score: {ai_score}")
+        log_message(f"🧠 {symbol} SHORT AI Score: {short_score}")
 
-        can_enter = check_entry_permission(ai_score)
+        can_long = check_entry_permission(ai_score)
+        can_short = check_entry_permission(short_score)
 
-        if can_enter:
+        if can_short:
 
-            log_message(f"📌 {symbol} Signal added to watchlist")
-            send_telegram_message(f"📌 發現高分訊號：{symbol}")
+            if has_existing_position(symbol, "SHORT"):
+                log_message(f"⏭️ {symbol} 已有 SHORT 持倉，跳過")
+                continue
 
-            order_result = safe_demo_order_test(symbol)
+            log_message(f"📌 {symbol} SHORT Signal added")
+            send_telegram_message(f"📌 發現高分做空訊號：{symbol}")
 
-            #order_result = safe_demo_order_test()
+            order_result = safe_demo_order_test(
+                symbol,
+                direction="SHORT"
+            )
+
+            log_trade(
+                symbol=symbol,
+                side="SHORT",
+                ai_score=short_score,
+                bot_mode=BOT_MODE,
+                result=str(order_result)
+            )
+
+            log_message(f"✅ {symbol} SHORT VST結果：{order_result}")
+
+            continue
+
+        if can_long:
+
+            if has_existing_position(symbol, "LONG"):
+                log_message(f"⏭️ {symbol} 已有 LONG 持倉，跳過")
+                continue
+
+            log_message(f"📌 {symbol} LONG Signal added")
+            send_telegram_message(f"📌 發現高分做多訊號：{symbol}")
+
+            order_result = safe_demo_order_test(
+                symbol,
+                direction="LONG"
+            )
 
             log_trade(
                 symbol=symbol,
@@ -60,34 +90,8 @@ def run_scanner():
                 result=str(order_result)
             )
 
-            log_message(f"✅ {symbol} VST 模擬下單結果：{order_result}")
+            log_message(f"✅ {symbol} LONG VST結果：{order_result}")
 
-            if order_result and order_result.get("code") == 0:
+            continue
 
-                send_telegram_message(
-                    f"""
-📈 VST模擬開倉成功
-
-幣種：{symbol}
-方向：做多
-AI分數：{ai_score}
-模式：{BOT_MODE}
-"""
-                )
-
-            else:
-
-                send_telegram_message(
-                    f"""
-⛔ VST模擬開倉未執行
-
-幣種：{symbol}
-原因：已存在相同方向持倉或風控阻擋
-AI分數：{ai_score}
-模式：{BOT_MODE}
-"""
-                )
-
-        else:
-
-            log_message(f"⛔ {symbol} Signal rejected")
+        log_message(f"⛔ {symbol} LONG / SHORT Signal rejected")

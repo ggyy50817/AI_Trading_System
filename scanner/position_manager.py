@@ -5,7 +5,7 @@ def get_open_vst_positions():
 
     positions_data = get_vst_positions()
 
-    positions = positions_data["data"]
+    positions = positions_data.get("data", [])
 
     open_positions = []
 

@@ -1,35 +1,44 @@
-from dotenv import load_dotenv
-import os
-import requests
+import time
 
-from scanner.position_manager import print_open_positions
 from scanner.scanner import run_scanner
-from risk_manager.risk_manager import check_risk
+from scanner.bingx_vst_api import manage_all_open_positions
 from logs.logger import log_message
-load_dotenv()
 
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-def send_telegram_message(message):
+SCAN_INTERVAL_SECONDS = 300
 
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
-    data = {
-        "chat_id": CHAT_ID,
-        "text": message
-    }
+def main_loop():
 
-    requests.post(url, data=data)
+    log_message("🚀 BingX AI Trading System started")
 
-log_message("🚀 AI Trading System Start")
+    while True:
 
-send_telegram_message("🚀 AI Trading System 已啟動")
+        try:
 
-run_scanner()
+            log_message("📊 開始管理現有持倉")
+            manage_all_open_positions()
 
-check_risk()
+            log_message("🔍 開始掃描新訊號")
+            run_scanner()
 
-print_open_positions()
+            log_message(
+                f"⏳ 本輪完成，等待 {SCAN_INTERVAL_SECONDS} 秒後進入下一輪"
+            )
 
-log_message("✅ System Ready")
+            time.sleep(SCAN_INTERVAL_SECONDS)
+
+        except KeyboardInterrupt:
+
+            log_message("🛑 使用者手動停止系統")
+            break
+
+        except Exception as e:
+
+            log_message(f"❌ 主循環錯誤：{e}")
+
+            time.sleep(60)
+
+
+if __name__ == "__main__":
+    main_loop()

@@ -79,7 +79,12 @@ def get_position_by_symbol(symbol):
 
     positions = get_vst_positions()
 
-    for position in positions["data"]:
+    print("🔥 get_vst_positions 原始回傳：")
+    print(positions)
+
+    positions_list = positions.get("data", [])
+
+    for position in positions_list:
 
         if position["symbol"] == symbol:
 
@@ -89,34 +94,61 @@ def get_position_by_symbol(symbol):
 def calculate_tp_sl(position):
 
     entry_price = float(position["avgPrice"])
+    position_side = position["positionSide"]
 
-    tp1 = entry_price * 1.01
-    tp2 = entry_price * 1.02
-    tp3 = entry_price * 1.03
+    if position_side == "LONG":
+        tp1 = entry_price * 1.01
+        tp2 = entry_price * 1.02
+        tp3 = entry_price * 1.03
+        sl = entry_price * 0.98
 
-    sl = entry_price * 0.98
+    elif position_side == "SHORT":
+        tp1 = entry_price * 0.99
+        tp2 = entry_price * 0.98
+        tp3 = entry_price * 0.97
+        sl = entry_price * 1.02
+
+    else:
+        return None
 
     return {
-        "tp1": round(tp1, 2),
-        "tp2": round(tp2, 2),
-        "tp3": round(tp3, 2),
-        "sl": round(sl, 2)
+        "tp1": round(tp1, 6),
+        "tp2": round(tp2, 6),
+        "tp3": round(tp3, 6),
+        "sl": round(sl, 6)
     }
 def check_tp_sl_status(position, tp_sl):
 
     current_price = float(position["markPrice"])
+    position_side = position["positionSide"]
 
-    if current_price >= tp_sl["tp3"]:
-        return "TP3_HIT"
+    if position_side == "LONG":
 
-    if current_price >= tp_sl["tp2"]:
-        return "TP2_HIT"
+        if current_price >= tp_sl["tp3"]:
+            return "TP3_HIT"
 
-    if current_price >= tp_sl["tp1"]:
-        return "TP1_HIT"
+        if current_price >= tp_sl["tp2"]:
+            return "TP2_HIT"
 
-    if current_price <= tp_sl["sl"]:
-        return "STOP_LOSS_HIT"
+        if current_price >= tp_sl["tp1"]:
+            return "TP1_HIT"
+
+        if current_price <= tp_sl["sl"]:
+            return "STOP_LOSS_HIT"
+
+    elif position_side == "SHORT":
+
+        if current_price <= tp_sl["tp3"]:
+            return "TP3_HIT"
+
+        if current_price <= tp_sl["tp2"]:
+            return "TP2_HIT"
+
+        if current_price <= tp_sl["tp1"]:
+            return "TP1_HIT"
+
+        if current_price >= tp_sl["sl"]:
+            return "STOP_LOSS_HIT"
 
     return "HOLD"
 def translate_tp_sl_status(status):
@@ -157,6 +189,7 @@ def calculate_trailing_stop(position, breakeven):
 
     current_price = float(position["markPrice"])
     entry_price = float(position["avgPrice"])
+    position_side = position["positionSide"]
 
     if not breakeven["breakeven_active"]:
         return {
@@ -164,10 +197,26 @@ def calculate_trailing_stop(position, breakeven):
             "trailing_stop": None
         }
 
-    trailing_stop = current_price * 0.995
+    if position_side == "LONG":
 
-    if trailing_stop < entry_price:
-        trailing_stop = entry_price
+        trailing_stop = current_price * 0.995
+
+        if trailing_stop < entry_price:
+            trailing_stop = entry_price
+
+    elif position_side == "SHORT":
+
+        trailing_stop = current_price * 1.005
+
+        if trailing_stop > entry_price:
+            trailing_stop = entry_price
+
+    else:
+
+        return {
+            "trailing_active": False,
+            "trailing_stop": None
+        }
 
     return {
         "trailing_active": True,
@@ -255,7 +304,7 @@ def simulate_auto_close(close_order_params):
     )
 def parse_vst_positions(positions_data):
 
-    positions = positions_data["data"]
+    positions = positions_data.get("data", [])
 
     parsed_positions = []
 
@@ -289,21 +338,21 @@ def detect_high_leverage_positions(parsed_positions, max_leverage=10):
 
 def has_existing_position(symbol, position_side):
 
-    print("🔥 has_existing_position 被呼叫")
-    print("symbol =", symbol)
+    #print("🔥 has_existing_position 被呼叫")
+    #print("symbol =", symbol)
 
     positions_data = get_vst_positions()
 
-    positions = positions_data["data"]
+    positions = positions_data.get("data", [])
 
     for position in positions:
 
-        print("===== Position Debug =====")
-        print("要檢查的幣種:", symbol)
-        print("持倉幣種:", position["symbol"])
-        print("要檢查的方向:", position_side)
-        print("持倉方向:", position["positionSide"])
-        print("持倉數量:", position["positionAmt"])
+        #print("===== Position Debug =====")
+        #print("要檢查的幣種:", symbol)
+        #print("持倉幣種:", position["symbol"])
+        #print("要檢查的方向:", position_side)
+        #print("持倉方向:", position["positionSide"])
+        #print("持倉數量:", position["positionAmt"])
 
         if (
             position["symbol"] == symbol
@@ -311,7 +360,7 @@ def has_existing_position(symbol, position_side):
             and float(position["positionAmt"]) != 0
         ):
 
-            print("🚫 發現重複持倉")
+            #print("🚫 發現重複持倉")
             return True
 
     return False
@@ -319,7 +368,7 @@ def count_open_positions():
 
     positions_data = get_vst_positions()
 
-    positions = positions_data["data"]
+    positions = positions_data.get("data", [])
 
     count = 0
 
@@ -507,8 +556,8 @@ def get_demo_quantity(symbol):
 
     quantity_map = {
         "BTC-USDT": 0.001,
-        "ETH-USDT": 0.001,
-        "SOL-USDT": 0.01,
+        "ETH-USDT": 0.002,   # 修正
+        "SOL-USDT": 0.03,    # 修正
         "BNB-USDT": 0.01,
         "XRP-USDT": 2,
         "DOGE-USDT": 25,
@@ -518,7 +567,7 @@ def get_demo_quantity(symbol):
     }
 
     return quantity_map.get(symbol, 0.001)
-def safe_demo_order_test(symbol="BTC-USDT"):
+def safe_demo_order_test(symbol="BTC-USDT", direction="LONG"):
 
     bot_mode = os.getenv("BOT_MODE")
 
@@ -526,8 +575,18 @@ def safe_demo_order_test(symbol="BTC-USDT"):
         print("❌ 目前不是 DEMO_TRADING / DEMO_TRAINING 模式，禁止模擬開單")
         return None
 
-    side = "BUY"
-    position_side = "LONG"
+    if direction == "LONG":
+        side = "BUY"
+        position_side = "LONG"
+
+    elif direction == "SHORT":
+        side = "SELL"
+        position_side = "SHORT"
+
+    else:
+        print(f"❌ 不支援的交易方向：{direction}")
+        return None
+
     quantity = get_demo_quantity(symbol)
     leverage = 10
 
@@ -545,7 +604,7 @@ def safe_demo_order_test(symbol="BTC-USDT"):
         print(f"目前持倉數：{open_positions}")
         print(f"最大允許持倉數：{max_position}")
 
-        return None    
+        return None
 
     print("⚠️ 準備送出 VST 模擬測試單")
     print(f"幣種：{symbol}")
@@ -646,6 +705,85 @@ def test_position_management(symbol="BTC-USDT"):
     print("\nVST 模擬平倉送單測試：")
 
     print(close_result)
+def manage_all_open_positions():
+
+    positions_data = get_vst_positions()
+
+    positions = positions_data.get("data", [])
+
+    if not positions:
+        print("📌 目前沒有任何持倉")
+        return
+
+    print("\n====================")
+    print("📊 開始管理所有持倉")
+    print("====================\n")
+
+    for position in positions:
+
+        if float(position["positionAmt"]) == 0:
+            continue
+
+        symbol = position["symbol"]
+
+        print("\n====================")
+        print(f"管理持倉：{symbol} {position['positionSide']}")
+        print("====================")
+
+        tp_sl = calculate_tp_sl(position)
+
+        print("TP / SL：")
+        print(tp_sl)
+
+        tp_sl_status = check_tp_sl_status(
+            position,
+            tp_sl
+        )
+
+        print("TP / SL 狀態：")
+        print(tp_sl_status)
+
+        breakeven = check_breakeven(
+            position,
+            tp_sl_status
+        )
+
+        print("保本狀態：")
+        print(breakeven)
+
+        trailing_stop = calculate_trailing_stop(
+            position,
+            breakeven
+        )
+
+        print("移動止損：")
+        print(trailing_stop)
+
+        auto_close_action = decide_auto_close_action(
+            tp_sl_status
+        )
+
+        print("自動平倉決策：")
+        print(auto_close_action)
+
+        close_quantity = calculate_close_quantity(
+            position,
+            auto_close_action
+        )
+
+        close_order_params = build_close_order_params(
+            position,
+            close_quantity
+        )
+
+        print("平倉單參數：")
+        print(close_order_params)
+
+        execute_auto_close_and_log(
+            position,
+            auto_close_action,
+            close_order_params
+        )    
 def test_position_limit():
 
     open_positions = count_open_positions()
@@ -655,7 +793,88 @@ def test_position_limit():
     print("\n持倉數量限制測試：")
     print(f"目前持倉數：{open_positions}")
     print(f"最大允許持倉數：{max_position}")
+def test_trailing_stop_with_fake_position():
 
+    fake_position = {
+        "symbol": "BTC-USDT",
+        "positionSide": "LONG",
+        "positionAmt": "0.0010",
+        "avgPrice": "63390.9",
+        "markPrice": "64100.0",
+        "leverage": 10,
+        "unrealizedProfit": "0",
+        "pnlRatio": "0"
+    }
+
+    tp_sl = calculate_tp_sl(fake_position)
+
+    print("\n假資料 TP / SL：")
+    print(tp_sl)
+
+    tp_sl_status = check_tp_sl_status(
+        fake_position,
+        tp_sl
+    )
+
+    print("\n假資料 TP / SL 狀態：")
+    print(tp_sl_status)
+
+    breakeven = check_breakeven(
+        fake_position,
+        tp_sl_status
+    )
+
+    print("\n假資料保本系統：")
+    print(breakeven)
+
+    trailing_stop = calculate_trailing_stop(
+        fake_position,
+        breakeven
+    )
+
+    print("\n假資料移動止損系統：")
+    print(trailing_stop)
+def test_short_trailing_stop_with_fake_position():
+
+    fake_position = {
+        "symbol": "BTC-USDT",
+        "positionSide": "SHORT",
+        "positionAmt": "0.0010",
+        "avgPrice": "63390.9",
+        "markPrice": "62600.0",
+        "leverage": 10,
+        "unrealizedProfit": "0",
+        "pnlRatio": "0"
+    }
+
+    tp_sl = calculate_tp_sl(fake_position)
+
+    print("\nSHORT 假資料 TP / SL：")
+    print(tp_sl)
+
+    tp_sl_status = check_tp_sl_status(
+        fake_position,
+        tp_sl
+    )
+
+    print("\nSHORT 假資料 TP / SL 狀態：")
+    print(tp_sl_status)
+
+    breakeven = check_breakeven(
+        fake_position,
+        tp_sl_status
+    )
+
+    print("\nSHORT 假資料保本系統：")
+    print(breakeven)
+
+    trailing_stop = calculate_trailing_stop(
+        fake_position,
+        breakeven
+    )
+
+    print("\nSHORT 假資料移動止損系統：")
+    print(trailing_stop)
 if __name__ == "__main__":
 
     balance = get_vst_balance()
