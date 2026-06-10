@@ -14,9 +14,27 @@ WATCHLIST = [
     "XRP-USDT",
     "DOGE-USDT",
     "SUI-USDT",
-    # "PEPE-USDT",
     "LINK-USDT",
-    "AVAX-USDT"
+    "AVAX-USDT",
+
+    "APT-USDT",
+    "ARB-USDT",
+    "OP-USDT",
+    "INJ-USDT",
+    "SEI-USDT",
+
+    "FET-USDT",
+    "RENDER-USDT",
+    "TIA-USDT",
+    "TON-USDT",
+    "NEAR-USDT",
+
+    "FIL-USDT",
+    "ENA-USDT",
+    "JUP-USDT",
+
+    "WIF-USDT",
+    "PEPE-USDT"
 ]
 
 
