@@ -285,8 +285,7 @@ def build_close_order_params(position, close_quantity):
         "side": side,
         "positionSide": position_side,
         "type": "MARKET",
-        "quantity": close_quantity,
-        "reduceOnly": True
+        "quantity": close_quantity
     }
 def simulate_auto_close(close_order_params):
 
