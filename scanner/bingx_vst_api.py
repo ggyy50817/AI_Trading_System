@@ -570,8 +570,24 @@ def get_demo_quantity(symbol):
     "DOGE-USDT": 75,
     "SUI-USDT": 9,
     "LINK-USDT": 0.9,
-    "AVAX-USDT": 3
-    }
+    "AVAX-USDT": 3,
+
+    "APT-USDT": 3,
+    "ARB-USDT": 20,
+    "OP-USDT": 10,
+    "INJ-USDT": 1,
+    "SEI-USDT": 30,
+    "FET-USDT": 20,
+    "RENDER-USDT": 3,
+    "TIA-USDT": 3,
+    "TON-USDT": 3,
+    "NEAR-USDT": 5,
+    "FIL-USDT": 5,
+    "ENA-USDT": 30,
+    "JUP-USDT": 30,
+    "WIF-USDT": 20,
+    "PEPE-USDT": 1000000
+}
 
     return quantity_map.get(symbol, 0.001)
 def safe_demo_order_test(symbol="BTC-USDT", direction="LONG"):
