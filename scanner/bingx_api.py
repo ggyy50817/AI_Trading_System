@@ -204,7 +204,8 @@ def klines_to_dataframe(klines):
     df["Volume"] = df["Volume"].astype(float)
 
     df["MA20"] = df["Close"].rolling(window=20).mean()
-
+    df["MA60"] = df["Close"].rolling(window=60).mean()
+    
     atr = AverageTrueRange(
         high=df["High"],
         low=df["Low"],

@@ -1,3 +1,5 @@
+from scanner.market_regime import get_market_regime
+
 from scanner.bingx_api import (
     get_klines,
     klines_to_dataframe,
@@ -12,7 +14,6 @@ from scanner.bingx_api import (
     check_oi_condition,
     calculate_ai_score as calculate_real_ai_score
 )
-
 
 def calculate_ai_score(symbol="BTC-USDT"):
 
@@ -45,6 +46,9 @@ def calculate_ai_score(symbol="BTC-USDT"):
     print(f"Funding 狀態：{funding_status}")
     print(f"OI 狀態：{oi_status}")
     print("==========================")
+    market_regime = get_market_regime()
+
+    print(f"🌎 Market Regime: {market_regime}")
     ai_score = calculate_real_ai_score(
         is_above,
         is_volume_spike,
@@ -52,6 +56,8 @@ def calculate_ai_score(symbol="BTC-USDT"):
         oi_status,
         atr_status
     )
+    if market_regime == "BULL":
+        ai_score += 10
 
     return ai_score
 def calculate_short_ai_score(symbol="BTC-USDT"):
@@ -100,5 +106,10 @@ def calculate_short_ai_score(symbol="BTC-USDT"):
     print(f"Funding 原始數值：{funding_percent}")
     print(f"OI 原始數值：{open_interest}")
     print("===============================")
+    market_regime = get_market_regime()
 
+    if market_regime == "BEAR":
+        short_score += 10
+
+    print(f"🌎 Market Regime: {market_regime}")
     return short_score
