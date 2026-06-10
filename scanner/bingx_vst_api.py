@@ -260,10 +260,18 @@ def decide_auto_close_action(tp_sl_status):
 def calculate_close_quantity(position, auto_close_action):
 
     position_amount = float(position["positionAmt"])
+    entry_price = float(position["avgPrice"])
 
     close_percent = auto_close_action["close_percent"]
 
     close_quantity = position_amount * (close_percent / 100)
+
+    close_value = close_quantity * entry_price
+
+    # BingX 最小平倉金額保護：
+    # 如果是部分平倉，但金額太小，改成全部平倉
+    if close_percent < 100 and close_value < 5:
+        close_quantity = position_amount
 
     return round(close_quantity, 6)
 def build_close_order_params(position, close_quantity):
