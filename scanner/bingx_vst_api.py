@@ -573,10 +573,10 @@ def get_demo_quantity(symbol):
     "AVAX-USDT": 3,
 
     "APT-USDT": 5,
-    "ARB-USDT": 20,
-    "OP-USDT": 10,
+    "ARB-USDT": 30,
+    "OP-USDT": 25,
     "INJ-USDT": 1,
-    "SEI-USDT": 30,
+    "SEI-USDT": 50,
     "FET-USDT": 20,
     "RENDER-USDT": 3,
     "TIA-USDT": 10,
