@@ -562,15 +562,15 @@ def execute_auto_close_and_log(
 def get_demo_quantity(symbol):
 
     quantity_map = {
-        "BTC-USDT": 0.001,
-        "ETH-USDT": 0.002,   # 修正
-        "SOL-USDT": 0.03,    # 修正
-        "BNB-USDT": 0.01,
-        "XRP-USDT": 2,
-        "DOGE-USDT": 25,
-        "SUI-USDT": 3,
-        "LINK-USDT": 0.3,
-        "AVAX-USDT": 1
+    "BTC-USDT": 0.003,
+    "ETH-USDT": 0.006,
+    "SOL-USDT": 0.09,
+    "BNB-USDT": 0.03,
+    "XRP-USDT": 6,
+    "DOGE-USDT": 75,
+    "SUI-USDT": 9,
+    "LINK-USDT": 0.9,
+    "AVAX-USDT": 3
     }
 
     return quantity_map.get(symbol, 0.001)
