@@ -562,32 +562,33 @@ def execute_auto_close_and_log(
 def get_demo_quantity(symbol):
 
     quantity_map = {
-            "BTC-USDT": 0.01,
-            "ETH-USDT": 0.03,
-            "SOL-USDT": 0.5,
-            "BNB-USDT": 0.15,
-            "XRP-USDT": 40,
-            "DOGE-USDT": 500,
-            "SUI-USDT": 40,
-            "LINK-USDT": 5,
-            "AVAX-USDT": 10,
+        "BTC-USDT": 0.0016,
+        "ETH-USDT": 0.06,
+        "SOL-USDT": 1.5,
+        "BNB-USDT": 0.17,
+        "XRP-USDT": 90,
+        "DOGE-USDT": 1200,
+        "SUI-USDT": 135,
+        "LINK-USDT": 13,
+        "AVAX-USDT": 15,
 
-            "APT-USDT": 15,
-            "ARB-USDT": 150,
-            "OP-USDT": 120,
-            "INJ-USDT": 5,
-            "SEI-USDT": 250,
-            "FET-USDT": 100,
-            "RENDER-USDT": 15,
-            "TIA-USDT": 40,
-            "TON-USDT": 10,
-            "NEAR-USDT": 20,
-            "FIL-USDT": 20,
-            "ENA-USDT": 150,
-            "JUP-USDT": 150,
-            "WIF-USDT": 100,
-            "PEPE-USDT": 5000000
+        "APT-USDT": 160,
+        "ARB-USDT": 1250,
+        "OP-USDT": 1080,
+        "INJ-USDT": 20,
+        "SEI-USDT": 2100,
+        "FET-USDT": 530,
+        "RENDER-USDT": 65,
+        "TIA-USDT": 310,
+        "TON-USDT": 35,
+        "NEAR-USDT": 50,
+        "FIL-USDT": 135,
+        "ENA-USDT": 1300,
+        "JUP-USDT": 665,
+        "WIF-USDT": 660,
+        "PEPE-USDT": 10000000
     }
+
     return quantity_map.get(symbol, 0.001)
 def safe_demo_order_test(symbol="BTC-USDT", direction="LONG"):
 
