@@ -2,7 +2,7 @@ from logs.logger import log_message
 from config.settings import BOT_MODE
 
 
-DEMO_TRAINING_MIN_AI_SCORE = 70
+DEMO_TRAINING_MIN_AI_SCORE = 80
 
 DEMO_TRADING_MIN_AI_SCORE = 90
 

@@ -1,23 +1,16 @@
-# Environment
-.env
-
-# Python Cache
+venv/
 __pycache__/
-*.pyc
 
-# Logs
+cooldown_state.json
+tp_state.json
+
+trading_log_v2.csv
+trading_log_v2_backup.csv
+
 *.log
 
-# Trading Logs
+.env
+
 trading_log.csv
-trading_log_old.csv
 
-# Cursor
-.cursor/
-
-# VSCode
-.vscode/
-
-# Windows
-Thumbs.db
-Desktop.ini
+ult",
