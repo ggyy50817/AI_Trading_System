@@ -4,6 +4,7 @@ import os
 
 
 TRADE_LOG_FILE = "trading_log.csv"
+CLOSE_LOG_FILE = "trading_log_v2.csv"
 
 
 def log_trade(
@@ -62,12 +63,15 @@ def log_close_trade(
     pnl_percent,
     ai_score=0,
     bot_mode="DEMO_TRADING",
-    result="CLOSE"
+    result="CLOSE",
+    close_reason="UNKNOWN",
+    action="UNKNOWN",
+    close_percent=0
 ):
 
-    file_exists = os.path.isfile(TRADE_LOG_FILE)
+    file_exists = os.path.isfile(CLOSE_LOG_FILE)
 
-    with open(TRADE_LOG_FILE, "a", newline="", encoding="utf-8") as file:
+    with open(CLOSE_LOG_FILE, "a", newline="", encoding="utf-8") as file:
 
         writer = csv.writer(file)
 
@@ -83,7 +87,10 @@ def log_close_trade(
                 "pnl_percent",
                 "ai_score",
                 "bot_mode",
-                "result"
+                "result",
+                "close_reason",
+                "action",
+                "close_percent"
             ])
 
         writer.writerow([
@@ -96,5 +103,8 @@ def log_close_trade(
             pnl_percent,
             ai_score,
             bot_mode,
-            result
+            result,
+            close_reason,
+            action,
+            close_percent
         ])

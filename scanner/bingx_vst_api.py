@@ -2,6 +2,7 @@ import time
 import hmac
 import hashlib
 import requests
+import json
 from urllib.parse import urlencode
 from dotenv import load_dotenv
 import os
@@ -15,6 +16,8 @@ if PROJECT_ROOT not in sys.path:
 
 from logs.trade_logger import log_close_trade
 
+from scanner.cooldown_engine import add_cooldown
+
 from config.settings import (
     BOT_MODE,
     MAX_POSITION,
@@ -24,6 +27,70 @@ from config.settings import (
 )
 
 load_dotenv()
+
+TP_STATE_FILE = "tp_state.json"
+
+
+def load_tp_state():
+
+    if not os.path.exists(TP_STATE_FILE):
+        return {}
+
+    try:
+        with open(TP_STATE_FILE, "r") as f:
+            return json.load(f)
+
+    except:
+        return {}
+
+
+def save_tp_state(state):
+
+    with open(TP_STATE_FILE, "w") as f:
+        json.dump(state, f, indent=4)
+
+def get_tp_state_key(position):
+
+    symbol = position["symbol"]
+    side = position["positionSide"]
+
+    return f"{symbol}_{side}"
+
+def get_tp_state(position):
+
+    state = load_tp_state()
+
+    key = get_tp_state_key(position)
+
+    if key not in state:
+
+        state[key] = {
+            "tp1_done": False,
+            "tp2_done": False,
+            "tp3_done": False
+        }
+
+        save_tp_state(state)
+
+    return state[key]
+
+def mark_tp_done(position, tp_name):
+
+    state = load_tp_state()
+
+    key = get_tp_state_key(position)
+
+    if key not in state:
+
+        state[key] = {
+            "tp1_done": False,
+            "tp2_done": False,
+            "tp3_done": False
+        }
+
+    state[key][tp_name] = True
+
+    save_tp_state(state)
 
 VST_BASE_URL = "https://open-api-vst.bingx.com"
 
@@ -122,34 +189,52 @@ def check_tp_sl_status(position, tp_sl):
     current_price = float(position["markPrice"])
     position_side = position["positionSide"]
 
+    tp_state = get_tp_state(position)
+
     if position_side == "LONG":
 
-        if current_price >= tp_sl["tp3"]:
+        if (
+            current_price >= tp_sl["tp3"]
+            and not tp_state["tp3_done"]
+        ):
             return "TP3_HIT"
 
-        if current_price >= tp_sl["tp2"]:
+        if (
+            current_price >= tp_sl["tp2"]
+            and not tp_state["tp2_done"]
+        ):
             return "TP2_HIT"
 
-        if current_price >= tp_sl["tp1"]:
+        if (
+            current_price >= tp_sl["tp1"]
+            and not tp_state["tp1_done"]
+        ):
             return "TP1_HIT"
 
         if current_price <= tp_sl["sl"]:
             return "STOP_LOSS_HIT"
-
     elif position_side == "SHORT":
 
-        if current_price <= tp_sl["tp3"]:
+        if (
+            current_price <= tp_sl["tp3"]
+            and not tp_state["tp3_done"]
+        ):
             return "TP3_HIT"
 
-        if current_price <= tp_sl["tp2"]:
+        if (
+            current_price <= tp_sl["tp2"]
+            and not tp_state["tp2_done"]
+        ):
             return "TP2_HIT"
 
-        if current_price <= tp_sl["tp1"]:
+        if (
+            current_price <= tp_sl["tp1"]
+            and not tp_state["tp1_done"]
+        ):
             return "TP1_HIT"
 
         if current_price >= tp_sl["sl"]:
             return "STOP_LOSS_HIT"
-
     return "HOLD"
 def translate_tp_sl_status(status):
 
@@ -270,7 +355,11 @@ def calculate_close_quantity(position, auto_close_action):
 
     # BingX 最小平倉金額保護：
     # 如果是部分平倉，但金額太小，改成全部平倉
-    if close_percent < 100 and close_value < 5:
+    if (
+    	close_percent > 0
+    	and close_percent < 100
+    	and close_value < 5
+    ):
         close_quantity = position_amount
 
     return round(close_quantity, 6)
@@ -543,6 +632,22 @@ def execute_auto_close_and_log(
 
     close_result = safe_demo_close_test(close_order_params)
 
+    if auto_close_action["action"] == "PARTIAL_CLOSE":
+
+        if "TP1" in auto_close_action["reason"]:
+            mark_tp_done(position, "tp1_done")
+
+        elif "TP2" in auto_close_action["reason"]:
+            mark_tp_done(position, "tp2_done")
+
+    if auto_close_action["action"] == "FULL_CLOSE":
+
+        if "TP3" in auto_close_action["reason"]:
+            mark_tp_done(position, "tp3_done")
+
+        if "止損" in auto_close_action["reason"]:
+            add_cooldown(position["symbol"])
+
     pnl_data = calculate_close_pnl(
         position,
         close_quantity
@@ -555,7 +660,10 @@ def execute_auto_close_and_log(
         exit_price=pnl_data["exit_price"],
         pnl=pnl_data["pnl"],
         pnl_percent=pnl_data["pnl_percent"],
-        result=str(close_result)
+        result=str(close_result),
+        close_reason=auto_close_action["reason"],
+        action=auto_close_action["action"],
+        close_percent=auto_close_action["close_percent"]
     )
 
     return close_result

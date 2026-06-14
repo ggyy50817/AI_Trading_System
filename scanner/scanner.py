@@ -5,6 +5,7 @@ from logs.logger import log_message
 from scanner.ai_score import calculate_ai_score, calculate_short_ai_score
 from scanner.entry_filter import check_entry_permission
 from telegram_utils.telegram_bot import send_telegram_message
+from scanner.cooldown_engine import is_in_cooldown
 
 WATCHLIST = [
     "BTC-USDT",
@@ -65,6 +66,9 @@ def run_scanner():
             if has_existing_position(symbol, "SHORT"):
                 log_message(f"⏭️ {symbol} 已有 SHORT 持倉，跳過")
                 continue
+            if is_in_cooldown(symbol):
+                log_message(f"🧊 {symbol} 冷卻中，跳過")
+                continue
 
             log_message(f"📌 {symbol} SHORT Signal added")
             send_telegram_message(f"📌 發現高分做空訊號：{symbol}")
@@ -90,6 +94,10 @@ def run_scanner():
 
             if has_existing_position(symbol, "LONG"):
                 log_message(f"⏭️ {symbol} 已有 LONG 持倉，跳過")
+                continue
+
+            if is_in_cooldown(symbol):
+                log_message(f"🧊 {symbol} 冷卻中，跳過")
                 continue
 
             log_message(f"📌 {symbol} LONG Signal added")
