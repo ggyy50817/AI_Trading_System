@@ -7,6 +7,8 @@ from scanner.entry_filter import check_entry_permission
 from telegram_utils.telegram_bot import send_telegram_message
 from scanner.cooldown_engine import is_in_cooldown
 
+SHORT_MIN_SCORE = 90
+
 WATCHLIST = [
     "BTC-USDT",
     "ETH-USDT",
@@ -59,7 +61,12 @@ def run_scanner():
         log_message(f"🧠 {symbol} SHORT AI Score: {short_score}")
 
         can_long = check_entry_permission(ai_score)
-        can_short = check_entry_permission(short_score)
+        can_short = short_score >= SHORT_MIN_SCORE
+
+        if can_short:
+            log_message(f"✅ SHORT AI Score {short_score} >= {SHORT_MIN_SCORE}，允許做空")
+        else:
+            log_message(f"❌ SHORT AI Score {short_score} < {SHORT_MIN_SCORE}，禁止做空")
 
         if can_short:
 
