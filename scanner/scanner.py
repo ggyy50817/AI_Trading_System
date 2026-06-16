@@ -6,8 +6,18 @@ from scanner.ai_score import calculate_ai_score, calculate_short_ai_score
 from scanner.entry_filter import check_entry_permission
 from telegram_utils.telegram_bot import send_telegram_message
 from scanner.cooldown_engine import is_in_cooldown
+from scanner.market_regime import get_market_regime
 
 SHORT_MIN_SCORE = 90
+
+def get_regime_thresholds(regime):
+    if regime == "BULL":
+        return 80, 95
+
+    if regime == "BEAR":
+        return 95, 90
+
+    return 90, 95
 
 WATCHLIST = [
     "BTC-USDT",
@@ -43,6 +53,10 @@ WATCHLIST = [
 
 def run_scanner():
 
+    current_regime = get_market_regime()
+    long_min_score, short_min_score = get_regime_thresholds(current_regime)
+    log_message(f"🌎 Market Regime V2: {current_regime} | LONG>={long_min_score} SHORT>={short_min_score}")
+
     log_message("🔍 Scanner is running...")
 
     for symbol in WATCHLIST:
@@ -60,13 +74,18 @@ def run_scanner():
         log_message(f"🧠 {symbol} LONG AI Score: {ai_score}")
         log_message(f"🧠 {symbol} SHORT AI Score: {short_score}")
 
-        can_long = check_entry_permission(ai_score)
-        can_short = short_score >= SHORT_MIN_SCORE
+        can_long = ai_score >= long_min_score
+        can_short = short_score >= short_min_score
+
+        if can_long:
+            log_message(f"✅ LONG AI Score {ai_score} >= {long_min_score}，允許做多")
+        else:
+            log_message(f"❌ LONG AI Score {ai_score} < {long_min_score}，禁止做多")
 
         if can_short:
-            log_message(f"✅ SHORT AI Score {short_score} >= {SHORT_MIN_SCORE}，允許做空")
+            log_message(f"✅ SHORT AI Score {short_score} >= {short_min_score}，允許做空")
         else:
-            log_message(f"❌ SHORT AI Score {short_score} < {SHORT_MIN_SCORE}，禁止做空")
+            log_message(f"❌ SHORT AI Score {short_score} < {short_min_score}，禁止做空")
 
         if can_short:
 
