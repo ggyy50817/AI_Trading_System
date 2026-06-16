@@ -164,8 +164,7 @@ def print_open_positions():
         print(f"未實現盈虧：{position['unrealizedProfit']}")
         print(f"盈虧比例：{position['pnlRatio']}")
         if should_stop_loss(position):
-            print("🚨 已達止損條件")
-            execute_stop_loss_close(position)
+            print("🚨 已達止損條件，但 print_open_positions 只顯示，不執行平倉")
 
         else:
             print("✅ 尚未達止損條件")
@@ -173,7 +172,7 @@ def print_open_positions():
             take_profit = get_take_profit_level(position)
 
             if take_profit:
-                execute_take_profit_close(position, take_profit)
+                print(f"🎯 已達 {take_profit['level']} 條件，但 print_open_positions 只顯示，不執行平倉")
             else:
                 print("📌 尚未達止盈條件")
         print("--------------------")
