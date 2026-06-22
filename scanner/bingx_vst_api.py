@@ -18,6 +18,8 @@ from logs.trade_logger import log_close_trade
 
 from scanner.cooldown_engine import add_cooldown
 
+from position_size_engine import calculate_position_quantity
+
 from config.settings import (
     BOT_MODE,
     MAX_POSITION,
@@ -53,8 +55,9 @@ def get_tp_state_key(position):
 
     symbol = position["symbol"]
     side = position["positionSide"]
+    entry_price = str(position.get("avgPrice", "0"))
 
-    return f"{symbol}_{side}"
+    return f"{symbol}_{side}_{entry_price}"
 
 def get_tp_state(position):
 
@@ -142,6 +145,37 @@ def get_vst_positions():
     path = "/openApi/swap/v2/user/positions"
 
     return send_signed_request("GET", path)
+
+def get_market_price(symbol):
+    path = "/openApi/swap/v2/quote/price"
+
+    params = {
+        "symbol": symbol
+    }
+
+    result = send_signed_request(
+        "GET",
+        path,
+        params
+    )
+
+    if result is None or result.get("code") != 0:
+        print(f"❌ 取得市場價格失敗：{symbol}")
+        print(result)
+        return None
+
+    data = result.get("data", {})
+
+    price = data.get("price") or data.get("lastPrice") or data.get("markPrice")
+
+    if price is None:
+        print(f"❌ 市場價格欄位不存在：{symbol}")
+        print(result)
+        return None
+
+    return float(price)
+
+
 def get_position_by_symbol(symbol):
 
     positions = get_vst_positions()
@@ -194,10 +228,10 @@ def check_tp_sl_status(position, tp_sl):
     if position_side == "LONG":
 
         if (
-            current_price >= tp_sl["tp3"]
-            and not tp_state["tp3_done"]
+            current_price >= tp_sl["tp1"]
+            and not tp_state["tp1_done"]
         ):
-            return "TP3_HIT"
+            return "TP1_HIT"
 
         if (
             current_price >= tp_sl["tp2"]
@@ -206,20 +240,20 @@ def check_tp_sl_status(position, tp_sl):
             return "TP2_HIT"
 
         if (
-            current_price >= tp_sl["tp1"]
-            and not tp_state["tp1_done"]
+            current_price >= tp_sl["tp3"]
+            and not tp_state["tp3_done"]
         ):
-            return "TP1_HIT"
+            return "TP3_HIT"
 
         if current_price <= tp_sl["sl"]:
             return "STOP_LOSS_HIT"
     elif position_side == "SHORT":
 
         if (
-            current_price <= tp_sl["tp3"]
-            and not tp_state["tp3_done"]
+            current_price <= tp_sl["tp1"]
+            and not tp_state["tp1_done"]
         ):
-            return "TP3_HIT"
+            return "TP1_HIT"
 
         if (
             current_price <= tp_sl["tp2"]
@@ -228,10 +262,10 @@ def check_tp_sl_status(position, tp_sl):
             return "TP2_HIT"
 
         if (
-            current_price <= tp_sl["tp1"]
-            and not tp_state["tp1_done"]
+            current_price <= tp_sl["tp3"]
+            and not tp_state["tp3_done"]
         ):
-            return "TP1_HIT"
+            return "TP3_HIT"
 
         if current_price >= tp_sl["sl"]:
             return "STOP_LOSS_HIT"
@@ -718,8 +752,20 @@ def safe_demo_order_test(symbol="BTC-USDT", direction="LONG"):
         print(f"❌ 不支援的交易方向：{direction}")
         return None
 
-    quantity = get_demo_quantity(symbol)
     leverage = 10
+
+    price = get_market_price(symbol)
+
+    if price is None:
+        print("❌ 無法取得市場價格，禁止開單")
+        return None
+
+    quantity = calculate_position_quantity(
+        symbol,
+        price,
+        leverage=leverage
+    )
+
 
     if has_existing_position(symbol, position_side):
         print("❌ 已存在相同方向持倉，禁止重複開單")
