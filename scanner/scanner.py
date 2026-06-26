@@ -55,7 +55,11 @@ def run_scanner():
 
     current_regime = get_market_regime()
     long_min_score, short_min_score = get_regime_thresholds(current_regime)
-    log_message(f"🌎 Market Regime V2: {current_regime} | LONG>={long_min_score} SHORT>={short_min_score}")
+    log_message(
+    f"🌎 Regime={current_regime} "
+    f"LONG>={long_min_score} "
+    f"SHORT>={short_min_score}"
+)
 
     log_message("🔍 Scanner is running...")
 

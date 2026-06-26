@@ -22,6 +22,25 @@ def get_market_regime():
         latest_ma20 = df.iloc[-1]["MA20"]
         latest_ma60 = df.iloc[-1]["MA60"]
 
+        atr = df.iloc[-1]["ATR"]
+        atr_pct = atr / latest_close
+
+        volume_now = df.iloc[-1]["Volume"]
+        volume_avg = df["Volume"].tail(20).mean()
+
+        ma20_now = df.iloc[-1]["MA20"]
+        ma20_prev = df.iloc[-2]["MA20"]
+        ma20_slope = ma20_now - ma20_prev
+
+        if atr_pct > 0.035:
+            return "RANGE"
+
+        if volume_now < volume_avg * 0.8:
+            return "RANGE"
+
+        if abs(ma20_slope) < latest_close * 0.001:
+            return "RANGE"
+
         if latest_close > latest_ma20 and latest_ma20 > latest_ma60:
             return "BULL"
 
