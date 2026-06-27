@@ -54,7 +54,32 @@ if hours >= 24:
 else:
     print(f"Time Target 24H: Collecting, remaining {24-hours:.2f}h")
 
-if len(closed) >= 30:
+sample_count = len(closed)
+time_ready = hours >= 24
+sample_ready = sample_count >= 30
+milestone_ready = time_ready or sample_ready
+
+if sample_ready:
     print("Sample Target 30: PASS")
 else:
-    print(f"Sample Target 30: Collecting, remaining {30-len(closed)} samples")
+    print(f"Sample Target 30: Collecting, remaining {30-sample_count} samples")
+
+print()
+print("=" * 60)
+print("Validation Progress")
+print("=" * 60)
+print(f"Runtime: {hours:.2f} / 24h {'PASS' if time_ready else 'Collecting'}")
+print(f"Samples: {sample_count} / 30 {'PASS' if sample_ready else 'Collecting'}")
+
+print()
+print("=" * 60)
+print("Next Task")
+print("=" * 60)
+
+if milestone_ready:
+    print("Validation Milestone Reached")
+    print("Next: Validation Report V1")
+else:
+    print("Continue Collecting Samples")
+    print(f"Runtime Remaining: {max(0, 24-hours):.2f}h")
+    print(f"Sample Remaining: {max(0, 30-sample_count)}")
