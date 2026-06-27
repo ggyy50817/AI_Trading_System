@@ -14,7 +14,7 @@ PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
-from logs.trade_logger import log_close_trade
+from viewlogs.trade_logger import log_close_trade
 
 from scanner.cooldown_engine import add_cooldown
 

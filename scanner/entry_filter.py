@@ -1,4 +1,4 @@
-from logs.logger import log_message
+from viewlogs.logger import log_message
 from config.settings import BOT_MODE
 
 

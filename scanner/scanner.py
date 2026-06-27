@@ -1,7 +1,7 @@
-from logs.trade_logger import log_trade
+from viewlogs.trade_logger import log_trade
 from config.settings import BOT_MODE
 from scanner.bingx_vst_api import safe_demo_order_test, has_existing_position
-from logs.logger import log_message
+from viewlogs.logger import log_message
 from scanner.ai_score import calculate_ai_score, calculate_short_ai_score
 from scanner.entry_filter import check_entry_permission
 from telegram_utils.telegram_bot import send_telegram_message

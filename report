@@ -1,0 +1,7 @@
+#!/bin/bash
+cd ~/AI_Trading_System
+source venv/bin/activate
+python - <<'PY'
+from terminal.report import show
+show()
+PY

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cd ~/AI_Trading_System
+source venv/bin/activate
+
+pkill -f "python main.py"
+
+sleep 2
+
+tmux send-keys -t tradingbot C-c
+sleep 1
+
+tmux send-keys -t tradingbot "cd ~/AI_Trading_System" Enter
+tmux send-keys -t tradingbot "source venv/bin/activate" Enter
+tmux send-keys -t tradingbot "python main.py" Enter
+
+echo "Bot restarted."

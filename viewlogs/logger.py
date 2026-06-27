@@ -8,5 +8,5 @@ def log_message(message):
 
     print(log)
 
-    with open("logs/system.log", "a", encoding="utf-8") as file:
+    with open("viewlogs/system.log", "a", encoding="utf-8") as file:
         file.write(log + "\n")

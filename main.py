@@ -2,7 +2,7 @@ import time
 
 from scanner.scanner import run_scanner
 from scanner.bingx_vst_api import manage_all_open_positions
-from logs.logger import log_message
+from viewlogs.logger import log_message
 
 
 SCAN_INTERVAL_SECONDS = 300

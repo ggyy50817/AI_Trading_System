@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd ~/AI_Trading_System
+source venv/bin/activate
+./check.py
