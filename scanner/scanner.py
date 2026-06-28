@@ -1,4 +1,5 @@
 from viewlogs.trade_logger import log_trade
+from viewlogs.trade_context import save_trade_context
 from config.settings import BOT_MODE
 from scanner.bingx_vst_api import safe_demo_order_test, has_existing_position
 from viewlogs.logger import log_message
@@ -108,6 +109,19 @@ def run_scanner():
                 direction="SHORT"
             )
 
+            save_trade_context(
+                symbol=symbol,
+                side="SHORT",
+                ai_score=short_score,
+                bot_mode=BOT_MODE,
+                extra={
+                    "long_score": ai_score,
+                    "short_score": short_score,
+                    "threshold_long": long_min_score,
+                    "threshold_short": short_min_score,
+                }
+            )
+
             log_trade(
                 symbol=symbol,
                 side="SHORT",
@@ -136,6 +150,19 @@ def run_scanner():
             order_result = safe_demo_order_test(
                 symbol,
                 direction="LONG"
+            )
+
+            save_trade_context(
+                symbol=symbol,
+                side="LONG",
+                ai_score=ai_score,
+                bot_mode=BOT_MODE,
+                extra={
+                    "long_score": ai_score,
+                    "short_score": short_score,
+                    "threshold_long": long_min_score,
+                    "threshold_short": short_min_score,
+                }
             )
 
             log_trade(
