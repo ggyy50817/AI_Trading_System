@@ -109,7 +109,7 @@ def run_scanner():
                 direction="SHORT"
             )
 
-            save_trade_context(
+            saved_context = save_trade_context(
                 symbol=symbol,
                 side="SHORT",
                 ai_score=short_score,
@@ -121,6 +121,7 @@ def run_scanner():
                     "threshold_short": short_min_score,
                 }
             )
+            log_message(f"✅ 已保存交易上下文：{symbol} SHORT AI={short_score} Regime={saved_context.get('market_regime')}")
 
             log_trade(
                 symbol=symbol,
@@ -152,7 +153,7 @@ def run_scanner():
                 direction="LONG"
             )
 
-            save_trade_context(
+            saved_context = save_trade_context(
                 symbol=symbol,
                 side="LONG",
                 ai_score=ai_score,
@@ -164,6 +165,7 @@ def run_scanner():
                     "threshold_short": short_min_score,
                 }
             )
+            log_message(f"✅ 已保存交易上下文：{symbol} LONG AI={ai_score} Regime={saved_context.get('market_regime')}")
 
             log_trade(
                 symbol=symbol,
