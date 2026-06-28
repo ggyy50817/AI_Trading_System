@@ -1,0 +1,81 @@
+======================================================================
+BingX AI Trading System - Validation Report V1
+======================================================================
+Start Time: 2026-06-26 17:45:00
+Generated At: 2026-06-28 17:42:12
+
+===== 1. Overall Performance =====
+Valid TP3/SL Samples: 45
+TP3: 13
+SL: 32
+TP3 Rate: 28.89%
+Gross Profit: 40.7927
+Gross Loss: -73.1623
+Net PnL: -32.3696
+Profit Factor: 0.5576
+
+===== 2. LONG / SHORT Performance =====
+LONG: Samples=9, TP3=1, SL=8, TP3Rate=11.11%, NetPnL=-14.3019, PF=0.1741
+SHORT: Samples=36, TP3=12, SL=24, TP3Rate=33.33%, NetPnL=-18.0677, PF=0.6765
+
+===== 3. By Date =====
+2026-06-26: Samples=16, TP3=3, SL=13, TP3Rate=18.75%, NetPnL=-19.9628, PF=0.3162
+2026-06-27: Samples=18, TP3=1, SL=17, TP3Rate=5.56%, NetPnL=-35.1763, PF=0.0793
+2026-06-28: Samples=11, TP3=9, SL=2, TP3Rate=81.82%, NetPnL=22.7695, PF=4.9521
+
+===== 4. Symbol Ranking =====
+SEI-USDT: Samples=2, TP3=2, SL=0, TP3Rate=100.00%, NetPnL=6.3184, PF=inf
+JUP-USDT: Samples=2, TP3=2, SL=0, TP3Rate=100.00%, NetPnL=6.1321, PF=inf
+TIA-USDT: Samples=1, TP3=1, SL=0, TP3Rate=100.00%, NetPnL=3.0947, PF=inf
+ENA-USDT: Samples=1, TP3=1, SL=0, TP3Rate=100.00%, NetPnL=3.0303, PF=inf
+OP-USDT: Samples=1, TP3=1, SL=0, TP3Rate=100.00%, NetPnL=3.0156, PF=inf
+DOGE-USDT: Samples=2, TP3=1, SL=1, TP3Rate=50.00%, NetPnL=1.1540, PF=1.5592
+FET-USDT: Samples=2, TP3=1, SL=1, TP3Rate=50.00%, NetPnL=0.7034, PF=1.2937
+APT-USDT: Samples=3, TP3=1, SL=2, TP3Rate=33.33%, NetPnL=-1.3750, PF=0.6865
+SUI-USDT: Samples=3, TP3=1, SL=2, TP3Rate=33.33%, NetPnL=-1.3907, PF=0.7041
+AVAX-USDT: Samples=3, TP3=1, SL=2, TP3Rate=33.33%, NetPnL=-1.4436, PF=0.6942
+BNB-USDT: Samples=1, TP3=0, SL=1, TP3Rate=0.00%, NetPnL=-2.0257, PF=0.0000
+LINK-USDT: Samples=1, TP3=0, SL=1, TP3Rate=0.00%, NetPnL=-2.2194, PF=0.0000
+SOL-USDT: Samples=1, TP3=0, SL=1, TP3Rate=0.00%, NetPnL=-2.2710, PF=0.0000
+FIL-USDT: Samples=1, TP3=0, SL=1, TP3Rate=0.00%, NetPnL=-2.3546, PF=0.0000
+INJ-USDT: Samples=4, TP3=1, SL=3, TP3Rate=25.00%, NetPnL=-3.4348, PF=0.4891
+BTC-USDT: Samples=2, TP3=0, SL=2, TP3Rate=0.00%, NetPnL=-4.3013, PF=0.0000
+RENDER-USDT: Samples=2, TP3=0, SL=2, TP3Rate=0.00%, NetPnL=-4.3136, PF=0.0000
+XRP-USDT: Samples=2, TP3=0, SL=2, TP3Rate=0.00%, NetPnL=-4.4401, PF=0.0000
+ETH-USDT: Samples=2, TP3=0, SL=2, TP3Rate=0.00%, NetPnL=-4.4935, PF=0.0000
+ARB-USDT: Samples=2, TP3=0, SL=2, TP3Rate=0.00%, NetPnL=-4.6602, PF=0.0000
+NEAR-USDT: Samples=3, TP3=0, SL=3, TP3Rate=0.00%, NetPnL=-7.5587, PF=0.0000
+WIF-USDT: Samples=4, TP3=0, SL=4, TP3Rate=0.00%, NetPnL=-9.5359, PF=0.0000
+
+===== 5. Critical Findings =====
+- Overall PF=0.5576 < 1. Current strategy is negative expectancy in this validation window.
+- LONG Engine: Samples=9, TP3Rate=11.11%, PF=0.1741, NetPnL=-14.3019.
+- SHORT Engine: Samples=36, TP3Rate=33.33%, PF=0.6765, NetPnL=-18.0677.
+- Worst 5 symbols by Net PnL:
+  - WIF-USDT: NetPnL=-9.5359, Samples=4, PF=0.0000
+  - NEAR-USDT: NetPnL=-7.5587, Samples=3, PF=0.0000
+  - ARB-USDT: NetPnL=-4.6602, Samples=2, PF=0.0000
+  - ETH-USDT: NetPnL=-4.4935, Samples=2, PF=0.0000
+  - XRP-USDT: NetPnL=-4.4401, Samples=2, PF=0.0000
+- Best 5 symbols by Net PnL:
+  - SEI-USDT: NetPnL=6.3184, Samples=2, PF=inf
+  - JUP-USDT: NetPnL=6.1321, Samples=2, PF=inf
+  - TIA-USDT: NetPnL=3.0947, Samples=1, PF=inf
+  - ENA-USDT: NetPnL=3.0303, Samples=1, PF=inf
+  - OP-USDT: NetPnL=3.0156, Samples=1, PF=inf
+
+===== 6. Strategy Decisions Suggested =====
+1. Do NOT move to LIVE trading yet.
+2. Prioritize filtering bad trades before adding new indicators.
+3. Build Blocklist / Penalty research from worst symbols and losing clusters.
+4. Validate Reverse Engine only with historical data first; do not directly flip live trades.
+5. Keep risk controls unchanged: no higher leverage, no lower thresholds, no larger single/total risk.
+
+===== 7. Next Development Order =====
+P0: Review this Validation Report V1.
+P1: Add Validation Statistics V2 for AI Score / Funding / OI / ATR / Volume / MA20 / Market Regime clusters.
+P2: Build Blocklist Engine.
+P3: Build Penalty Engine.
+P4: Research Reverse Engine / Anti-AI Strategy in VST only.
+P5: Revisit Market Regime V2.
+P6: Position Size Engine after strategy filtering improves.
