@@ -113,3 +113,122 @@ def calculate_short_ai_score(symbol="BTC-USDT"):
 
     print(f"🌎 Market Regime: {market_regime}")
     return short_score
+# ============================
+# AI Context Engine V1
+# 新增：保留 AI Score 背後的完整判斷資料
+# 注意：不取代原本 calculate_ai_score / calculate_short_ai_score
+# ============================
+
+def calculate_ai_context(symbol="BTC-USDT"):
+    klines = get_klines(symbol)
+    df = klines_to_dataframe(klines)
+
+    latest_close = float(df.iloc[-1]["Close"])
+    latest_ma20 = float(df.iloc[-1]["MA20"])
+    latest_atr = float(df.iloc[-1]["ATR"])
+    latest_volume_ratio = float(df.iloc[-1]["VolumeRatio"])
+
+    is_above = check_above_ma20(df)
+    is_volume_spike = check_volume_spike(df)
+    atr_status = check_atr_condition(df)
+
+    funding = get_funding_rate(symbol)
+    funding_percent = parse_funding_rate(funding)
+    funding_status = check_funding_condition(funding_percent)
+
+    oi = get_open_interest(symbol)
+    open_interest = parse_open_interest(oi)
+    oi_status = check_oi_condition(open_interest)
+
+    market_regime = get_market_regime()
+
+    score = calculate_real_ai_score(
+        is_above,
+        is_volume_spike,
+        funding_status,
+        oi_status,
+        atr_status
+    )
+
+    if market_regime == "BULL":
+        score += 10
+
+    return {
+        "score": score,
+        "side": "LONG",
+        "symbol": symbol,
+        "funding_rate": funding_percent,
+        "funding_status": funding_status,
+        "open_interest": open_interest,
+        "oi_status": oi_status,
+        "atr": latest_atr,
+        "atr_status": atr_status,
+        "volume_ratio": latest_volume_ratio,
+        "volume_spike": is_volume_spike,
+        "ma20_position": "ABOVE" if is_above else "BELOW",
+        "latest_close": latest_close,
+        "latest_ma20": latest_ma20,
+        "market_regime": market_regime,
+    }
+
+
+def calculate_short_ai_context(symbol="BTC-USDT"):
+    klines = get_klines(symbol)
+    df = klines_to_dataframe(klines)
+
+    latest_close = float(df.iloc[-1]["Close"])
+    latest_ma20 = float(df.iloc[-1]["MA20"])
+    latest_atr = float(df.iloc[-1]["ATR"])
+    latest_volume_ratio = float(df.iloc[-1]["VolumeRatio"])
+
+    is_below_ma20 = latest_close < latest_ma20
+    is_volume_spike = check_volume_spike(df)
+    atr_status = check_atr_condition(df)
+
+    funding = get_funding_rate(symbol)
+    funding_percent = parse_funding_rate(funding)
+    funding_status = check_funding_condition(funding_percent)
+
+    oi = get_open_interest(symbol)
+    open_interest = parse_open_interest(oi)
+    oi_status = check_oi_condition(open_interest)
+
+    market_regime = get_market_regime()
+
+    short_score = 0
+
+    if is_below_ma20:
+        short_score += 40
+
+    if is_volume_spike:
+        short_score += 20
+
+    if funding_status == "偏空訊號":
+        short_score += 20
+
+    if oi_status == "資料正常":
+        short_score += 10
+
+    if atr_status == "波動正常":
+        short_score += 10
+
+    if market_regime == "BEAR":
+        short_score += 10
+
+    return {
+        "score": short_score,
+        "side": "SHORT",
+        "symbol": symbol,
+        "funding_rate": funding_percent,
+        "funding_status": funding_status,
+        "open_interest": open_interest,
+        "oi_status": oi_status,
+        "atr": latest_atr,
+        "atr_status": atr_status,
+        "volume_ratio": latest_volume_ratio,
+        "volume_spike": is_volume_spike,
+        "ma20_position": "BELOW" if is_below_ma20 else "ABOVE",
+        "latest_close": latest_close,
+        "latest_ma20": latest_ma20,
+        "market_regime": market_regime,
+    }
