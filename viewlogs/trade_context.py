@@ -68,6 +68,11 @@ def save_trade_context(symbol, side, ai_score=0, bot_mode="UNKNOWN", extra=None)
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     })
 
+    print("="*80)
+    print("DEBUG EXTRA")
+    print(extra)
+    print("="*80)
+
     if extra and isinstance(extra, dict):
         context.update(extra)
 
