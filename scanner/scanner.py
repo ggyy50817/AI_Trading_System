@@ -3,7 +3,7 @@ from viewlogs.trade_context import save_trade_context
 from config.settings import BOT_MODE
 from scanner.bingx_vst_api import safe_demo_order_test, has_existing_position
 from viewlogs.logger import log_message
-from scanner.ai_score import calculate_ai_score, calculate_short_ai_score
+from scanner.ai_score import calculate_ai_score, calculate_short_ai_score, calculate_ai_context, calculate_short_ai_context
 from scanner.entry_filter import check_entry_permission
 from telegram_utils.telegram_bot import send_telegram_message
 from scanner.cooldown_engine import is_in_cooldown
@@ -69,8 +69,11 @@ def run_scanner():
         log_message(f"🔎 正在掃描：{symbol}")
 
         try:
-            ai_score = calculate_ai_score(symbol)
-            short_score = calculate_short_ai_score(symbol)
+            long_context = calculate_ai_context(symbol)
+            short_context = calculate_short_ai_context(symbol)
+
+            ai_score = long_context.get("score", 0)
+            short_score = short_context.get("score", 0)
 
         except Exception as e:
             log_message(f"❌ {symbol} 掃描失敗：{e}")
@@ -115,10 +118,12 @@ def run_scanner():
                 ai_score=short_score,
                 bot_mode=BOT_MODE,
                 extra={
+                    **short_context,
                     "long_score": ai_score,
                     "short_score": short_score,
                     "threshold_long": long_min_score,
                     "threshold_short": short_min_score,
+                    "market_regime": current_regime,
                 }
             )
             log_message(f"✅ 已保存交易上下文：{symbol} SHORT AI={short_score} Regime={saved_context.get('market_regime')}")
@@ -159,10 +164,12 @@ def run_scanner():
                 ai_score=ai_score,
                 bot_mode=BOT_MODE,
                 extra={
+                    **long_context,
                     "long_score": ai_score,
                     "short_score": short_score,
                     "threshold_long": long_min_score,
                     "threshold_short": short_min_score,
+                    "market_regime": current_regime,
                 }
             )
             log_message(f"✅ 已保存交易上下文：{symbol} LONG AI={ai_score} Regime={saved_context.get('market_regime')}")
