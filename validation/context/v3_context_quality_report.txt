@@ -1,0 +1,23 @@
+===== Trading Log V3 Context Quality =====
+Total Rows: 129
+
+volume_spike: known=129 (100.00%), unknown=0 (0.00%)
+funding_rate: known=1 (0.78%), unknown=128 (99.22%)
+open_interest: known=1 (0.78%), unknown=128 (99.22%)
+atr: known=1 (0.78%), unknown=128 (99.22%)
+ma20: known=1 (0.78%), unknown=128 (99.22%)
+market_regime: known=1 (0.78%), unknown=128 (99.22%)
+long_score: known=108 (83.72%), unknown=21 (16.28%)
+short_score: known=108 (83.72%), unknown=21 (16.28%)
+entry_time: known=108 (83.72%), unknown=21 (16.28%)
+
+===== By Action =====
+止損已觸發，準備全部平倉: 49
+TP1 已觸發，準備平倉 30%: 34
+TP2 已觸發，準備再平倉 30%: 26
+TP3 已觸發，準備全部平倉: 19
+close_reason: 1
+
+===== By Side =====
+SHORT: 128
+side: 1
