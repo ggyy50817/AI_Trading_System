@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cd ~/AI_Trading_System
-
-tail -100 viewlogs/system.log

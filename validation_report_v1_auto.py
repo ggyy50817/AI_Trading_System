@@ -19,11 +19,11 @@ def to_float(v, default=0.0):
 def is_closed(row):
     if len(row) < 24:
         return False
-    reason = row[19]
+    reason = row[20]
     return any(k in reason for k in CLOSED_KEYWORDS)
 
 def result_type(row):
-    reason = row[19] if len(row) > 19 else ""
+    reason = row[20] if len(row) > 19 else ""
     if "TP3 已觸發" in reason:
         return "TP3"
     if "止損已觸發" in reason:

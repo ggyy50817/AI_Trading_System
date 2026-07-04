@@ -14,3 +14,13 @@ trading_log_v2_backup.csv
 trading_log.csv
 
 ult",
+
+# Runtime
+trading_log_v3.csv
+trade_context_state.json
+botlogs
+botlogs_old
+
+# Backup
+*.bak
+*.bak_*
