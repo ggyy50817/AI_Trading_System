@@ -4,6 +4,12 @@ from scanner.bingx_api import (
     check_above_ma20,
 )
 
+from replay.replay_ai_core import (
+    calculate_long_score,
+    calculate_short_score,
+)
+
+
 def calculate_replay_ai_context(df):
 
     latest_close = float(df.iloc[-1]["Close"])
@@ -12,22 +18,26 @@ def calculate_replay_ai_context(df):
     latest_volume_ratio = float(df.iloc[-1]["VolumeRatio"])
 
     is_above = check_above_ma20(df)
+    is_below = latest_close < latest_ma20
+
     is_volume_spike = check_volume_spike(df)
     atr_status = check_atr_condition(df)
 
-    score = 0
+    long_score = calculate_long_score(
+        is_above,
+        is_volume_spike,
+        atr_status,
+    )
 
-    if is_above:
-        score += 40
-
-    if is_volume_spike:
-        score += 20
-
-    if atr_status == "波動正常":
-        score += 10
+    short_score = calculate_short_score(
+        is_below,
+        is_volume_spike,
+        atr_status,
+    )
 
     return {
-        "score": score,
+        "long_score": long_score,
+        "short_score": short_score,
         "latest_close": latest_close,
         "latest_ma20": latest_ma20,
         "atr": latest_atr,
