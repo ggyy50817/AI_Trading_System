@@ -1,0 +1,10 @@
+{
+    "LONG": {},
+    "SHORT": {
+        "ARB-USDT": {
+            "samples": 18,
+            "pf": 0.1076,
+            "win_rate": 11.11
+        }
+    }
+}

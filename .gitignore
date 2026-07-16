@@ -1,26 +1,48 @@
-venv/
+# =========================
+# Python
+# =========================
 __pycache__/
+*.py[cod]
+*.pyo
 
-cooldown_state.json
-tp_state.json
+# =========================
+# Virtual Environment
+# =========================
+venv/
+.venv/
 
-trading_log_v2.csv
-trading_log_v2_backup.csv
-
-*.log
-
+# =========================
+# Environment
+# =========================
 .env
+.env.*
 
-trading_log.csv
-
-ult",
-
-# Runtime
-trading_log_v3.csv
+# =========================
+# Runtime State
+# =========================
+tp_state.json
+cooldown_state.json
 trade_context_state.json
-botlogs
+
+# =========================
+# Trading Logs
+# =========================
+trading_log*.csv
+
+# =========================
+# Debug
+# =========================
+replay_debug.txt
 botlogs_old
 
+# =========================
 # Backup
+# =========================
 *.bak
-*.bak_*
+*.bak.*
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db

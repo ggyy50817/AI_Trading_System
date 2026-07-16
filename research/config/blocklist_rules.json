@@ -1,0 +1,5 @@
+{
+    "min_samples": 15,
+    "pf_limit": 0.20,
+    "win_rate_limit": 20
+}

@@ -9,8 +9,10 @@ from replay.replay_ai_core import (
     calculate_short_score,
 )
 
+from penalty.penalty_engine import apply_penalty
 
-def calculate_replay_ai_context(df):
+
+def calculate_replay_ai_context(df, symbol="UNKNOWN"):
 
     latest_close = float(df.iloc[-1]["Close"])
     latest_ma20 = float(df.iloc[-1]["MA20"])
@@ -35,9 +37,23 @@ def calculate_replay_ai_context(df):
         atr_status,
     )
 
+    long_result = apply_penalty(
+        symbol,
+        "LONG",
+        long_score
+    )
+
+    short_result = apply_penalty(
+        symbol,
+        "SHORT",
+        short_score
+    )
+
     return {
-        "long_score": long_score,
-        "short_score": short_score,
+        "long_score": long_result["final_score"],
+        "short_score": short_result["final_score"],
+        "long_penalty": long_result["penalty"],
+        "short_penalty": short_result["penalty"],
         "latest_close": latest_close,
         "latest_ma20": latest_ma20,
         "atr": latest_atr,

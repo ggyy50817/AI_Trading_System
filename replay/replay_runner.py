@@ -4,9 +4,9 @@ from replay.replay_strategy import check_entry
 from replay.replay_position import ReplayPosition
 from replay.replay_logger import save_trade
 
-print("="*60)
-print("Replay Engine V7")
-print("="*60)
+print("=" * 60)
+print("Replay Engine V8")
+print("=" * 60)
 
 total_signals = 0
 total_trades = 0
@@ -24,15 +24,21 @@ for symbol in REPLAY_SYMBOLS:
 
     signals = 0
     trades = 0
+    last_result = None
 
     for i in range(60, len(df)):
 
         candle = df.iloc[i]
-        history = df.iloc[:i+1].copy()
+        history = df.iloc[: i + 1].copy()
 
         if not position.has_position():
 
-            result = check_entry(history)
+            result = check_entry(
+                history,
+                symbol
+            )
+
+            last_result = result
 
             if result["enter"]:
 
@@ -52,42 +58,44 @@ for symbol in REPLAY_SYMBOLS:
                 candle["Low"]
             )
 
-            if exit_result:
+            if exit_result is None:
+                continue
 
-                if "entry" in exit_result:
+            if "entry" not in exit_result:
 
-                    trades += 1
+                print(
+                    "[PARTIAL]",
+                    exit_result["reason"],
+                    exit_result["price"]
+                )
 
-                    print(
-                        "[CLOSE]",
-                        exit_result["reason"],
-                        exit_result["entry"],
-                        "->",
-                        exit_result["exit"]
-                    )
+                continue
 
-                    save_trade(
-                        symbol,
-                        position.position["side"] if position.position else result["side"],
-                        exit_result["entry"],
-                        exit_result["exit"],
-                        exit_result["reason"]
-                    )
+            trades += 1
 
-                else:
+            print(
+                "[CLOSE]",
+                exit_result["reason"],
+                exit_result["entry"],
+                "->",
+                exit_result["exit"]
+            )
 
-                    print(
-                        "[PARTIAL]",
-                        exit_result["reason"],
-                        exit_result["price"]
-                    )
+            save_trade(
+                symbol=symbol,
+                side=last_result["side"],
+                entry=exit_result["entry"],
+                exit_price=exit_result["exit"],
+                reason=exit_result["reason"],
+            )
 
     print(f"Signals={signals} Trades={trades}")
 
     total_signals += signals
     total_trades += trades
 
-print("\n==============================")
+print()
+print("=" * 30)
 print("Replay Finished")
 print("Total Signals:", total_signals)
 print("Total Trades :", total_trades)

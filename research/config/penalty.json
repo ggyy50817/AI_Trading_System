@@ -1,0 +1,10 @@
+{
+    "LONG": {},
+    "SHORT": {
+        "ARB-USDT": 20,
+        "AVAX-USDT": 15,
+        "INJ-USDT": 10,
+        "WIF-USDT": 10,
+        "XRP-USDT": 5
+    }
+}

@@ -1,35 +1,33 @@
 from replay.replay_ai import calculate_replay_ai_context
-
-LONG_THRESHOLD = 70
-SHORT_THRESHOLD = 70
+from research.decision_engine import get_research_decision
 
 
-def check_entry(df):
+def check_entry(df, symbol):
 
-    context = calculate_replay_ai_context(df)
+    context = calculate_replay_ai_context(
+        df,
+        symbol
+    )
 
     close = context["latest_close"]
     ma20 = context["latest_ma20"]
 
-    long_score = context["long_score"]
-    short_score = context["short_score"]
+    if close >= ma20:
+        side = "LONG"
+        score = context["long_score"]
+    else:
+        side = "SHORT"
+        score = context["short_score"]
 
-    if close >= ma20 and long_score >= LONG_THRESHOLD:
-        return {
-            "enter": True,
-            "side": "LONG",
-            "context": context
-        }
-
-    if close < ma20 and short_score >= SHORT_THRESHOLD:
-        return {
-            "enter": True,
-            "side": "SHORT",
-            "context": context
-        }
+    decision = get_research_decision(
+        symbol=symbol,
+        side=side,
+        score=score
+    )
 
     return {
-        "enter": False,
-        "side": None,
-        "context": context
+        "enter": decision["allow_entry"],
+        "side": side,
+        "context": context,
+        "decision": decision
     }
