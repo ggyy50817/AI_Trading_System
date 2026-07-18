@@ -28,6 +28,7 @@ trade_context_state.json
 # Trading Logs
 # =========================
 trading_log*.csv
+viewlogs/system.log
 
 # =========================
 # Debug
