@@ -1,4 +1,5 @@
 import time
+import traceback
 
 from scanner.scanner import run_scanner
 from scanner.bingx_vst_api import manage_all_open_positions
@@ -36,6 +37,7 @@ def main_loop():
         except Exception as e:
 
             log_message(f"❌ 主循環錯誤：{e}")
+            traceback.print_exc()
 
             time.sleep(60)
 

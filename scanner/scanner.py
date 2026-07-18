@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from viewlogs.trade_logger import log_trade
 from viewlogs.trade_context import save_trade_context
 from config.settings import BOT_MODE
@@ -8,6 +10,9 @@ from scanner.entry_filter import check_entry_permission
 from telegram_utils.telegram_bot import send_telegram_message
 from scanner.cooldown_engine import is_in_cooldown
 from scanner.market_regime import get_market_regime
+from core.scanner_result import ScannerResult
+from core.trading_decision_adapter import from_scanner
+from decision_pipeline.pipeline import process_decision
 
 SHORT_MIN_SCORE = 90
 
@@ -112,6 +117,21 @@ def run_scanner():
                 direction="SHORT"
             )
 
+            scanner_result = ScannerResult(
+                symbol=symbol,
+                side="SHORT",
+                timestamp=datetime.now(),
+                ai_score=short_score,
+                threshold=short_min_score,
+                market_regime=current_regime,
+                context=short_context,
+                order_result=order_result,
+            )
+
+            decision = from_scanner(scanner_result)
+
+            process_decision(decision)
+
             saved_context = save_trade_context(
                 symbol=symbol,
                 side="SHORT",
@@ -157,6 +177,21 @@ def run_scanner():
                 symbol,
                 direction="LONG"
             )
+
+            scanner_result = ScannerResult(
+                symbol=symbol,
+                side="LONG",
+                timestamp=datetime.now(),
+                ai_score=ai_score,
+                threshold=long_min_score,
+                market_regime=current_regime,
+                context=long_context,
+                order_result=order_result,
+            )
+
+            decision = from_scanner(scanner_result)
+
+            process_decision(decision)
 
             saved_context = save_trade_context(
                 symbol=symbol,
