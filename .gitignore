@@ -47,3 +47,6 @@ botlogs_old
 # =========================
 .DS_Store
 Thumbs.db
+
+
+decision_dataset/*.jsonl

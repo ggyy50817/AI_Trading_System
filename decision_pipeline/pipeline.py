@@ -15,22 +15,16 @@ Responsibility
     orders, retry, or mutate the decision.
 
 MVP
-    Consumers are a plain list (``CONSUMERS``). The list may be empty.
+    Consumers are registered in ``consumer_registry.py``.
     Each consumer is invoked inside its own try/except so one failure
     does not stop the others.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any
-
 from core.trading_decision import TradingDecision
+from decision_pipeline.consumer_registry import CONSUMERS
 from viewlogs.logger import log_message
-
-Consumer = Callable[[TradingDecision], Any]
-
-CONSUMERS: list[Consumer] = []
 
 
 def process_decision(decision: TradingDecision) -> None:
