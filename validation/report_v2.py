@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from collections import Counter
 
 from validation.parser import load_trading_log
@@ -16,10 +15,14 @@ def build_report():
     ]
 
     direction_counter = Counter()
+    market_regime_counter = Counter()
 
     for row in full:
         direction = row.get("side", "UNKNOWN")
         direction_counter[direction] += 1
+
+        market = row.get("market_regime", "UNKNOWN")
+        market_regime_counter[market] += 1
 
     report = {
         "summary": {
@@ -27,7 +30,7 @@ def build_report():
             "full_close": len(full)
         },
         "direction": dict(direction_counter),
-        "market_regime": {},
+        "market_regime": dict(market_regime_counter),
         "ai_score": {}
     }
 
@@ -49,6 +52,7 @@ def main():
     print(f"Rows: {report['summary']['rows']}")
     print(f"Full Close: {report['summary']['full_close']}")
     print(f"Direction: {report['direction']}")
+    print(f"Market Regime: {report['market_regime']}")
     print(f"Saved: {OUTPUT_FILE}")
 
 
