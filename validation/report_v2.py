@@ -18,7 +18,7 @@ def build_report():
     direction_counter = Counter()
 
     for row in full:
-        direction = row.get("direction", "UNKNOWN")
+        direction = row.get("side", "UNKNOWN")
         direction_counter[direction] += 1
 
     report = {
