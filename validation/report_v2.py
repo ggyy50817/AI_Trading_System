@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from collections import Counter
 
 from validation.parser import load_trading_log
 
@@ -9,11 +10,23 @@ OUTPUT_FILE = "validation_report.json"
 def build_report():
     rows = load_trading_log()
 
+    full = [
+        r for r in rows
+        if r.get("action") == "FULL_CLOSE"
+    ]
+
+    direction_counter = Counter()
+
+    for row in full:
+        direction = row.get("direction", "UNKNOWN")
+        direction_counter[direction] += 1
+
     report = {
         "summary": {
-            "rows": len(rows)
+            "rows": len(rows),
+            "full_close": len(full)
         },
-        "direction": {},
+        "direction": dict(direction_counter),
         "market_regime": {},
         "ai_score": {}
     }
@@ -34,6 +47,8 @@ def main():
     print("Validation Report V2")
     print("=" * 60)
     print(f"Rows: {report['summary']['rows']}")
+    print(f"Full Close: {report['summary']['full_close']}")
+    print(f"Direction: {report['direction']}")
     print(f"Saved: {OUTPUT_FILE}")
 
 
