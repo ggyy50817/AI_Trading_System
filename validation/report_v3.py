@@ -17,6 +17,7 @@ def build_report():
     direction_counter = Counter()
     market_regime_counter = Counter()
     ai_score_counter = Counter()
+    ai_score_tp_counter = Counter()
 
     for row in full:
         direction = row.get("side", "UNKNOWN")
@@ -29,15 +30,22 @@ def build_report():
 
         try:
             score = int(float(score))
-            ai_score_counter[score] += 1
         except (TypeError, ValueError):
             continue
+
+        ai_score_counter[score] += 1
+
+        close_reason = str(row.get("close_reason", ""))
+
+        if "TP3" in close_reason:
+            ai_score_tp_counter[score] += 1
 
     ai_score_report = {}
 
     for score in sorted(ai_score_counter.keys()):
         ai_score_report[str(score)] = {
-            "samples": ai_score_counter[score]
+            "samples": ai_score_counter[score],
+            "tp": ai_score_tp_counter[score]
         }
 
     report = {
