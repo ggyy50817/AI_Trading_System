@@ -1,7 +1,7 @@
 import csv
 from pathlib import Path
 
-DEFAULT_LOG = "trading_log_v3.csv"
+DEFAULT_LOG = Path(__file__).resolve().parent.parent / "trading_log_v3.csv"
 
 
 def load_trading_log(path=DEFAULT_LOG):

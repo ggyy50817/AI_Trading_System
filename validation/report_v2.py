@@ -1,58 +1,41 @@
-import pandas as pd
+import json
+from pathlib import Path
 
-df=pd.read_csv("trading_log_v3.csv")
+from validation.parser import load_trading_log
 
-full=df[df.action=="FULL_CLOSE"].copy()
+OUTPUT_FILE = "validation_report.json"
 
-print("="*70)
-print("Validation Report V2")
-print("="*70)
 
-keys=[
-"market_regime",
-"ai_score",
-"funding_rate",
-"volume_spike",
-"ma20_position",
-"symbol"
-]
+def build_report():
+    rows = load_trading_log()
 
-for k in keys:
-    print()
-    print("="*70)
-    print(k)
-    print("="*70)
+    report = {
+        "summary": {
+            "rows": len(rows)
+        },
+        "direction": {},
+        "market_regime": {},
+        "ai_score": {}
+    }
 
-    g=full.groupby(k).agg(
-        Samples=("pnl","count"),
-        TotalPnL=("pnl","sum"),
-        AvgPnL=("pnl","mean"),
-        WinRate=("pnl",lambda x:(x>0).mean()*100)
-    )
+    return report
 
-    print(g.sort_values("TotalPnL"))
 
-print()
-print("="*70)
-print("Worst 20 Trades")
-print("="*70)
+def save_report(report):
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=4, ensure_ascii=False)
 
-cols=[
-"time",
-"symbol",
-"ai_score",
-"market_regime",
-"funding_rate",
-"volume_spike",
-"ma20_position",
-"pnl"
-]
 
-print(full.sort_values("pnl").head(20)[cols])
+def main():
+    report = build_report()
+    save_report(report)
 
-print()
-print("="*70)
-print("Best 20 Trades")
-print("="*70)
+    print("=" * 60)
+    print("Validation Report V2")
+    print("=" * 60)
+    print(f"Rows: {report['summary']['rows']}")
+    print(f"Saved: {OUTPUT_FILE}")
 
-print(full.sort_values("pnl",ascending=False).head(20)[cols])
+
+if __name__ == "__main__":
+    main()
