@@ -16,8 +16,10 @@ def build_report():
 
     direction_counter = Counter()
     market_regime_counter = Counter()
+
     ai_score_counter = Counter()
     ai_score_tp_counter = Counter()
+    ai_score_sl_counter = Counter()
 
     for row in full:
         direction = row.get("side", "UNKNOWN")
@@ -40,12 +42,16 @@ def build_report():
         if "TP3" in close_reason:
             ai_score_tp_counter[score] += 1
 
+        if "止損" in close_reason:
+            ai_score_sl_counter[score] += 1
+
     ai_score_report = {}
 
     for score in sorted(ai_score_counter.keys()):
         ai_score_report[str(score)] = {
             "samples": ai_score_counter[score],
-            "tp": ai_score_tp_counter[score]
+            "tp": ai_score_tp_counter[score],
+            "sl": ai_score_sl_counter[score]
         }
 
     report = {
