@@ -1,27 +1,44 @@
-"""Opportunity data models.
+"""
+Opportunity Engine Data Models
 
-Opportunity Logger V1
-    Uses ``dict[str, Any]`` as the opportunity payload. No typed model is
-    required yet; callers pass plain dictionaries to ``log_opportunity``.
+Opportunity Engine does NOT define its own data schema.
 
-Future (V2)
-    Introduce an ``OpportunityRecord`` dataclass as the canonical schema.
+The canonical contract of the entire AI Trading System is:
 
-    Planned fields:
-        - timestamp
-        - symbol
-        - side
-        - price
-        - ai_score
-        - long_score
-        - short_score
-        - market_regime
-        - reason
-        - skip_reason
-        - executed
+    TradingDecision
 
-    Planned consumers / use cases:
-        - Shadow Trading
-        - Decision Dataset
-        - Replay Learning
+Produced by
+
+    Scanner
+    Replay
+    Research
+    Shadow Trading
+
+Consumed by
+
+    Opportunity Engine
+    Validation
+    Decision Dataset
+    Replay Compare
+    Future AI modules
+
+Opportunity Engine observes TradingDecision only.
+
+It never creates another schema.
+
+Future
+
+TradingDecision
+        ↓
+Opportunity Engine
+        ↓
+Logger
+        ↓
+Shadow Trading
+        ↓
+AI Memory
+        ↓
+Knowledge Analyzer
+        ↓
+AI Advisor
 """

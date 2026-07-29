@@ -13,6 +13,8 @@ from scanner.market_regime import get_market_regime
 from core.scanner_result import ScannerResult
 from core.trading_decision_adapter import from_scanner
 from decision_pipeline.pipeline import process_decision
+from opportunity.factory import create_opportunity
+from opportunity.logger import log_opportunity
 
 SHORT_MIN_SCORE = 90
 
@@ -99,6 +101,24 @@ def run_scanner():
             log_message(f"✅ SHORT AI Score {short_score} >= {short_min_score}，允許做空")
         else:
             log_message(f"❌ SHORT AI Score {short_score} < {short_min_score}，禁止做空")
+
+        opportunity_record= create_opportunity(
+            symbol=symbol,
+            market_regime=current_regime,
+            long_score=ai_score,
+            short_score=short_score,
+            long_threshold=long_min_score,
+            short_threshold=short_min_score,
+            can_long=can_long,
+            can_short=can_short,
+            reason=None,
+            context={
+                "long": long_context,
+                "short": short_context,
+            },
+        )
+
+        log_opportunity(opportunity_record)
 
         if can_short:
 
