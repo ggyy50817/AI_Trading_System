@@ -8,11 +8,11 @@ Shadow trades never submit real orders.
 Lifecycle
 
 OpportunityRecord
-        ↓
+    ->
 ShadowTrade
-        ↓
+    ->
 Shadow Validator
-        ↓
+    ->
 Statistics
 """
 
@@ -24,12 +24,20 @@ from datetime import datetime
 
 @dataclass(slots=True)
 class ShadowTrade:
+    """
+    Virtual trade used only for observation and validation.
+    """
+
     created_at: datetime
 
     symbol: str
     side: str
 
     entry_price: float
+
+    ai_score: int
+    threshold: int
+    market_regime: str
 
     tp1: float | None = None
     tp2: float | None = None

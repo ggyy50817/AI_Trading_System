@@ -15,6 +15,8 @@ from core.trading_decision_adapter import from_scanner
 from decision_pipeline.pipeline import process_decision
 from opportunity.factory import create_opportunity
 from opportunity.logger import log_opportunity
+from shadow.manager import create_shadow_trade
+from shadow.logger import log_shadow_trade
 
 SHORT_MIN_SCORE = 90
 
@@ -119,6 +121,19 @@ def run_scanner():
         )
 
         log_opportunity(opportunity_record)
+
+        shadow_trade = create_shadow_trade(opportunity_record)
+
+        if shadow_trade is not None:
+            log_shadow_trade(shadow_trade)
+            log_message(
+                f"👻 Shadow Trade: "
+                f"{shadow_trade.symbol} "
+                f"{shadow_trade.side} "
+                f"AI={shadow_trade.ai_score} "
+                f"Threshold={shadow_trade.threshold} "
+                f"Entry={shadow_trade.entry_price}"
+            )
 
         if can_short:
 
