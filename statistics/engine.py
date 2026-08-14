@@ -147,6 +147,23 @@ def group_stats(rows, key):
     return result
 
 
+def group_cross_stats(rows, key1, key2):
+    groups = defaultdict(list)
+
+    for r in rows:
+        value1 = str(r.get(key1, "UNKNOWN"))
+        value2 = str(r.get(key2, "UNKNOWN"))
+
+        groups[(value1, value2)].append(r)
+
+    result = {}
+
+    for (value1, value2), sample in groups.items():
+        result.setdefault(value1, {})
+        result[value1][value2] = calc_stats(sample)
+
+    return result
+
 def group_score_bucket(rows):
     groups = defaultdict(list)
 
@@ -263,6 +280,12 @@ def build_statistics(
             "market_regime",
         ),
 
+        "by_side_market_regime": group_cross_stats(
+            ai_context_rows,
+            "side",
+            "market_regime",
+        ),
+
         "by_volume_spike": group_stats(
             full_context_rows,
             "volume_spike",
@@ -369,3 +392,5 @@ if __name__ == "__main__":
         "Saved: "
         "statistics/statistics_v2_output.json"
     )
+
+
