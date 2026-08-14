@@ -97,8 +97,8 @@ def load_penalty_replay(
         )
 
         if (
-            penalty_result["final_score"]
-            < threshold
+            penalty_result["penalty"] > 0
+            and penalty_result["final_score"] < threshold
         ):
             penalty_filtered_rows.append(
                 row
@@ -215,3 +215,4 @@ if __name__ == "__main__":
                 f"{symbol:12} "
                 f"Filtered={count}"
             )
+
