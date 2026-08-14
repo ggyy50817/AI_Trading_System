@@ -1,4 +1,4 @@
-import json
+﻿import json
 from collections import Counter
 
 from validation.parser import load_trading_log
