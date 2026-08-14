@@ -8,6 +8,7 @@ Responsibilities
 - Receive OpportunityRecord.
 - Select a virtual LONG or SHORT candidate.
 - Create ShadowTrade objects.
+- Prevent duplicate continuous Shadow opportunities.
 - Never submit exchange orders.
 - Never modify live trading logic.
 - No API calls.
@@ -19,9 +20,12 @@ from __future__ import annotations
 
 from core.opportunity_record import OpportunityRecord
 from core.shadow_trade import ShadowTrade
+from shadow.dedup import is_new_shadow_opportunity
 
 
-def create_shadow_trade(opportunity: OpportunityRecord) -> ShadowTrade | None:
+def create_shadow_trade(
+    opportunity: OpportunityRecord,
+) -> ShadowTrade | None:
     """
     Convert one OpportunityRecord into one ShadowTrade candidate.
 
@@ -30,6 +34,7 @@ def create_shadow_trade(opportunity: OpportunityRecord) -> ShadowTrade | None:
     - If LONG and SHORT scores are equal, skip the opportunity.
     - Entry price is read from the selected side's latest_close.
     - Missing or invalid price means no ShadowTrade is created.
+    - Repeated continuous opportunities are skipped.
 
     IMPORTANT:
     Shadow selection does NOT require the real trading threshold to pass.
@@ -67,6 +72,15 @@ def create_shadow_trade(opportunity: OpportunityRecord) -> ShadowTrade | None:
         return None
 
     if entry_price <= 0:
+        return None
+
+    if not is_new_shadow_opportunity(
+        symbol=opportunity.symbol,
+        side=side,
+        ai_score=ai_score,
+        threshold=threshold,
+        market_regime=opportunity.market_regime,
+    ):
         return None
 
     return ShadowTrade(
