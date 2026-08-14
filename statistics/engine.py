@@ -164,6 +164,48 @@ def group_cross_stats(rows, key1, key2):
 
     return result
 
+def group_side_regime_ai_score(rows):
+    groups = defaultdict(list)
+
+    for r in rows:
+        side = str(r.get("side", "UNKNOWN"))
+        regime = str(r.get("market_regime", "UNKNOWN"))
+
+        try:
+            score = int(float(r.get("ai_score")))
+        except (TypeError, ValueError):
+            continue
+
+        groups[(side, regime, score)].append(r)
+
+    result = {}
+
+    for (side, regime, score), sample in groups.items():
+        result.setdefault(side, {})
+        result[side].setdefault(regime, {})
+        result[side][regime][str(score)] = calc_stats(sample)
+
+    return result
+
+def group_side_regime_score_bucket(rows):
+    groups = defaultdict(list)
+
+    for r in rows:
+        side = str(r.get("side", "UNKNOWN"))
+        regime = str(r.get("market_regime", "UNKNOWN"))
+        bucket = score_bucket(r.get("ai_score"))
+
+        groups[(side, regime, bucket)].append(r)
+
+    result = {}
+
+    for (side, regime, bucket), sample in groups.items():
+        result.setdefault(side, {})
+        result[side].setdefault(regime, {})
+        result[side][regime][bucket] = calc_stats(sample)
+
+    return result
+
 def group_score_bucket(rows):
     groups = defaultdict(list)
 
@@ -286,6 +328,18 @@ def build_statistics(
             "market_regime",
         ),
 
+        "by_side_market_regime_score_bucket": (
+            group_side_regime_score_bucket(
+                ai_context_rows
+            )
+        ),
+
+        "by_side_market_regime_ai_score": (
+            group_side_regime_ai_score(
+                ai_context_rows
+            )
+        ),
+
         "by_volume_spike": group_stats(
             full_context_rows,
             "volume_spike",
@@ -392,5 +446,9 @@ if __name__ == "__main__":
         "Saved: "
         "statistics/statistics_v2_output.json"
     )
+
+
+
+
 
 
