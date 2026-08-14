@@ -1,79 +1,129 @@
-import csv
-
-from replay_compare.config import START_TIME, LOG_FILE
+﻿from replay_compare.replay_original import load_original
 from research.blocklist_engine import is_blocked
 
 
-def f(x):
+def to_float(value):
     try:
-        return float(x)
-    except:
+        return float(value)
+    except (TypeError, ValueError):
         return 0.0
 
 
 def load_blocklist_replay():
+    original_rows = load_original()
 
-    original = 0
-    blocked = 0
-    kept = []
+    blocked_rows = []
+    kept_rows = []
 
-    with open(LOG_FILE, newline="", encoding="utf-8") as f:
+    for row in original_rows:
+        symbol = row.get("symbol", "")
+        side = row.get("side", "")
 
-        reader = csv.DictReader(f)
+        if is_blocked(symbol, side):
+            blocked_rows.append(row)
+            continue
 
-        for row in reader:
+        kept_rows.append(row)
 
-            if row["time"] < START_TIME:
-                continue
+    return {
+        "original_rows": original_rows,
+        "blocked_rows": blocked_rows,
+        "kept_rows": kept_rows,
+    }
 
-            reason = row["close_reason"]
 
-            if "TP3 已觸發" not in reason and \
-               "止損已觸發" not in reason:
-                continue
+def calculate_stats(rows):
+    wins = [
+        r for r in rows
+        if to_float(r.get("pnl")) > 0
+    ]
 
-            original += 1
+    losses = [
+        r for r in rows
+        if to_float(r.get("pnl")) < 0
+    ]
 
-            if is_blocked(row["symbol"], row["side"]):
-                blocked += 1
-                continue
+    gross_profit = sum(
+        to_float(r.get("pnl"))
+        for r in wins
+    )
 
-            kept.append(row)
+    gross_loss = abs(
+        sum(
+            to_float(r.get("pnl"))
+            for r in losses
+        )
+    )
 
-    return original, blocked, kept
+    net_pnl = gross_profit - gross_loss
+
+    profit_factor = (
+        gross_profit / gross_loss
+        if gross_loss else 0.0
+    )
+
+    win_rate = (
+        len(wins) / len(rows) * 100
+        if rows else 0.0
+    )
+
+    return {
+        "samples": len(rows),
+        "wins": len(wins),
+        "losses": len(losses),
+        "win_rate": win_rate,
+        "gross_profit": gross_profit,
+        "gross_loss": gross_loss,
+        "net_pnl": net_pnl,
+        "profit_factor": profit_factor,
+    }
 
 
 if __name__ == "__main__":
-
-    original, blocked, kept = load_blocklist_replay()
-
-    wins = [r for r in kept if f(r["pnl"]) > 0]
-    losses = [r for r in kept if f(r["pnl"]) < 0]
-
-    gp = sum(f(r["pnl"]) for r in wins)
-    gl = abs(sum(f(r["pnl"]) for r in losses))
-    pnl = gp - gl
-
-    pf = gp / gl if gl else 0
-
-    tp3 = len(wins)
-    sl = len(losses)
-
-    win_rate = tp3 / len(kept) * 100 if kept else 0
+    result = load_blocklist_replay()
+    stats = calculate_stats(
+        result["kept_rows"]
+    )
 
     print("=" * 70)
-    print("Replay Blocklist")
+    print("Replay Blocklist V3")
     print("=" * 70)
 
-    print(f"Original : {original}")
-    print(f"Blocked  : {blocked}")
-    print(f"Remain   : {len(kept)}")
+    print(
+        f"Original : "
+        f"{len(result['original_rows'])}"
+    )
+
+    print(
+        f"Blocked  : "
+        f"{len(result['blocked_rows'])}"
+    )
+
+    print(
+        f"Remain   : "
+        f"{stats['samples']}"
+    )
+
     print()
-
-    print(f"TP3      : {tp3}")
-    print(f"SL       : {sl}")
-    print(f"WinRate  : {win_rate:.2f}%")
-    print(f"GrossProfit : {gp:.4f}")
-    print(f"GrossLoss   : -{gl:.4f}")
-    print(f"NetPnL      : {pnl:.4f}")
-    print(f"PF          : {pf:.4f}")
+    print(f"Wins         : {stats['wins']}")
+    print(f"Losses       : {stats['losses']}")
+    print(
+        f"WinRate      : "
+        f"{stats['win_rate']:.2f}%"
+    )
+    print(
+        f"Gross Profit : "
+        f"{stats['gross_profit']:.4f}"
+    )
+    print(
+        f"Gross Loss   : "
+        f"-{stats['gross_loss']:.4f}"
+    )
+    print(
+        f"NetPnL       : "
+        f"{stats['net_pnl']:.4f}"
+    )
+    print(
+        f"PF           : "
+        f"{stats['profit_factor']:.4f}"
+    )

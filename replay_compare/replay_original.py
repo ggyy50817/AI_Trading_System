@@ -1,25 +1,56 @@
-import csv
+﻿import csv
 
 from replay_compare.config import START_TIME, LOG_FILE
 
 
 def load_original():
+    rows = []
 
-    rows=[]
+    with open(
+        LOG_FILE,
+        newline="",
+        encoding="utf-8"
+    ) as f:
 
-    with open(LOG_FILE,newline="",encoding="utf-8") as f:
-
-        reader=csv.DictReader(f)
+        reader = csv.DictReader(f)
 
         for row in reader:
 
-            if row["time"]<START_TIME:
+            if row.get("time", "") < START_TIME:
                 continue
 
-            reason=row["close_reason"]
+            if row.get("action") != "FULL_CLOSE":
+                continue
 
-            if "TP3 已觸發" not in reason and \
-               "止損已觸發" not in reason:
+            reason = row.get("close_reason", "")
+
+            if (
+                "TP3 已觸發" not in reason
+                and "止損已觸發" not in reason
+            ):
+                continue
+
+            market = str(
+                row.get(
+                    "market_regime",
+                    "UNKNOWN"
+                )
+            )
+
+            try:
+                score = int(
+                    float(
+                        row.get(
+                            "ai_score",
+                            0
+                        )
+                    )
+                )
+            except (TypeError, ValueError):
+                continue
+
+            # Exclude legacy rows without valid AI Context.
+            if score == 0 and market == "UNKNOWN":
                 continue
 
             rows.append(row)
@@ -27,33 +58,36 @@ def load_original():
     return rows
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
 
-    trades=load_original()
+    trades = load_original()
 
-    print("="*70)
-    print("Replay Original")
-    print("="*70)
+    print("=" * 70)
+    print("Replay Original V3")
+    print("=" * 70)
 
-    print("Trades :",len(trades))
+    print("Valid Context Trades:", len(trades))
 
     if trades:
 
         print()
         print("First")
         print(
-            trades[0]["time"],
-            trades[0]["symbol"],
-            trades[0]["side"],
-            trades[0]["close_reason"]
+            trades[0].get("time"),
+            trades[0].get("symbol"),
+            trades[0].get("side"),
+            trades[0].get("ai_score"),
+            trades[0].get("market_regime"),
+            trades[0].get("close_reason"),
         )
 
         print()
-
         print("Last")
         print(
-            trades[-1]["time"],
-            trades[-1]["symbol"],
-            trades[-1]["side"],
-            trades[-1]["close_reason"]
+            trades[-1].get("time"),
+            trades[-1].get("symbol"),
+            trades[-1].get("side"),
+            trades[-1].get("ai_score"),
+            trades[-1].get("market_regime"),
+            trades[-1].get("close_reason"),
         )
