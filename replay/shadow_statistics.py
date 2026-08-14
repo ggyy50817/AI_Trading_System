@@ -1,5 +1,7 @@
 ﻿"""
-Shadow Statistics V1
+Shadow Statistics V1.1
+
+Closed-sample statistics for Shadow Trading research.
 """
 
 from __future__ import annotations
@@ -10,6 +12,12 @@ from pathlib import Path
 
 
 INPUT_PATH = Path("runtime/shadow/shadow_outcomes.jsonl")
+
+CLOSED_RESULTS = {
+    "STOP_LOSS",
+    "TRAILING_STOP",
+    "TP3",
+}
 
 
 def load_outcomes():
@@ -25,6 +33,10 @@ def load_outcomes():
                 rows.append(json.loads(line))
 
     return rows
+
+
+def is_closed(row):
+    return str(row.get("result")) in CLOSED_RESULTS
 
 
 def profit_factor(rows):
@@ -55,16 +67,30 @@ def print_group(title, rows, key):
     print(f"===== {title} =====")
 
     for name, group in sorted(groups.items()):
-        pnl = sum(float(r.get("realized_pnl", 0) or 0) for r in group)
         wins = sum(
             1 for r in group
             if float(r.get("realized_pnl", 0) or 0) > 0
         )
+        losses = sum(
+            1 for r in group
+            if float(r.get("realized_pnl", 0) or 0) < 0
+        )
+        pnl = sum(
+            float(r.get("realized_pnl", 0) or 0)
+            for r in group
+        )
+
+        win_rate = (
+            wins / len(group) * 100
+            if group else 0.0
+        )
 
         print(
             f"{name}: "
-            f"Samples={len(group)} "
-            f"WinRate={wins / len(group) * 100:.2f}% "
+            f"Closed={len(group)} "
+            f"Wins={wins} "
+            f"Losses={losses} "
+            f"WinRate={win_rate:.2f}% "
             f"PnL={pnl:.4f} "
             f"PF={profit_factor(group):.4f}"
         )
@@ -74,43 +100,88 @@ def main():
     rows = load_outcomes()
 
     print("=" * 60)
-    print("Shadow Statistics V1")
+    print("Shadow Statistics V1.1")
     print("=" * 60)
 
     if not rows:
         print("No shadow outcomes.")
         return
 
-    pnl = sum(float(r.get("realized_pnl", 0) or 0) for r in rows)
+    closed_rows = [
+        row for row in rows
+        if is_closed(row)
+    ]
+
+    open_rows = [
+        row for row in rows
+        if str(row.get("status")) == "OPEN"
+    ]
+
+    no_future_rows = [
+        row for row in rows
+        if str(row.get("status")) == "NO_FUTURE_DATA"
+    ]
+
+    error_rows = [
+        row for row in rows
+        if str(row.get("status")) == "ERROR"
+    ]
+
     wins = sum(
-        1 for r in rows
+        1 for r in closed_rows
         if float(r.get("realized_pnl", 0) or 0) > 0
     )
+
     losses = sum(
-        1 for r in rows
+        1 for r in closed_rows
         if float(r.get("realized_pnl", 0) or 0) < 0
     )
 
-    results = Counter(
-        str(r.get("result", "UNKNOWN"))
-        for r in rows
+    pnl = sum(
+        float(r.get("realized_pnl", 0) or 0)
+        for r in closed_rows
     )
 
-    print("Samples:", len(rows))
-    print("Wins:", wins)
-    print("Losses:", losses)
-    print(f"Win Rate: {wins / len(rows) * 100:.2f}%")
-    print(f"Net PnL: {pnl:.4f}")
-    print(f"Profit Factor: {profit_factor(rows):.4f}")
+    win_rate = (
+        wins / len(closed_rows) * 100
+        if closed_rows else 0.0
+    )
+
+    print("Total Records:", len(rows))
+    print("Closed Samples:", len(closed_rows))
+    print("Open Samples:", len(open_rows))
+    print("No Future Data:", len(no_future_rows))
+    print("Errors:", len(error_rows))
 
     print()
-    print("===== Results =====")
+    print("Closed Wins:", wins)
+    print("Closed Losses:", losses)
+    print(f"Closed Win Rate: {win_rate:.2f}%")
+    print(f"Closed Net PnL: {pnl:.4f}")
+    print(f"Closed Profit Factor: {profit_factor(closed_rows):.4f}")
+
+    results = Counter(
+        str(r.get("result", "UNKNOWN"))
+        for r in closed_rows
+    )
+
+    print()
+    print("===== Closed Results =====")
 
     for result, count in results.most_common():
         print(f"{result}: {count}")
 
-    print_group("LONG / SHORT", rows, "side")
-    print_group("Market Regime", rows, "market_regime")
+    print_group(
+        "LONG / SHORT - CLOSED ONLY",
+        closed_rows,
+        "side",
+    )
+
+    print_group(
+        "Market Regime - CLOSED ONLY",
+        closed_rows,
+        "market_regime",
+    )
 
 
 if __name__ == "__main__":
