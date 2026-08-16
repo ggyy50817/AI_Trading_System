@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
 
 @dataclass(slots=True)
@@ -38,6 +39,8 @@ class ShadowTrade:
     ai_score: int
     threshold: int
     market_regime: str
+
+    context: dict[str, Any] | None = None
 
     tp1: float | None = None
     tp2: float | None = None

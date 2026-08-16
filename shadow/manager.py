@@ -91,4 +91,5 @@ def create_shadow_trade(
         ai_score=ai_score,
         threshold=threshold,
         market_regime=opportunity.market_regime,
+        context=side_context,
     )
