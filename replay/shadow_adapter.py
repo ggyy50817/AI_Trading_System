@@ -68,6 +68,7 @@ def to_replay_record(shadow_record: dict) -> dict:
         "ai_score": shadow_record.get("ai_score"),
         "threshold": shadow_record.get("threshold"),
         "market_regime": shadow_record.get("market_regime"),
+        "context": shadow_record.get("context"),
         "entry_price": shadow_record.get("entry_price"),
         "tp1": shadow_record.get("tp1"),
         "tp2": shadow_record.get("tp2"),
