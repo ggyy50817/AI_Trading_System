@@ -143,7 +143,7 @@ def run_sensitivity() -> None:
                 )
 
                 pnl = float(
-                    row.get("pnl") or 0.0
+                    row.get("realized_pnl") or 0.0
                 )
 
                 performance[key]["n"] += 1
