@@ -1,4 +1,4 @@
-﻿"""
+"""
 Historical Regime Transition Audit V1
 
 Analyze Shadow performance by:
@@ -24,6 +24,9 @@ from replay.shadow_historical_data import (
 from research.historical_context_sequence import (
     load_historical_context_sequence,
 )
+from research.historical_regime_sensitivity import (
+    classify_with_thresholds,
+)
 from research.historical_regime_transition import (
     calculate_regime_age,
     regime_age_bucket,
@@ -36,6 +39,21 @@ DEFAULT_INPUT = Path(
 
 INTERVAL_MS = 15 * 60 * 1000
 SEQUENCE_LENGTH = 80
+
+# Research baseline only.
+# These are NOT production parameter changes.
+VOLUME_THRESHOLD = 0.0
+SLOPE_THRESHOLD = 0.0
+
+
+def classify_research_regime(
+    snapshot: dict[str, Any],
+) -> str:
+    return classify_with_thresholds(
+        snapshot,
+        VOLUME_THRESHOLD,
+        SLOPE_THRESHOLD,
+    )
 
 AGE_BUCKETS = (
     "1",
@@ -291,7 +309,8 @@ def run_audit() -> None:
                 age,
                 left_censored,
             ) = calculate_regime_age(
-                sequence
+                sequence,
+                classifier=classify_research_regime,
             )
 
             age_bucket = regime_age_bucket(

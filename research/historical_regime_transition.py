@@ -1,4 +1,4 @@
-﻿"""
+"""
 Historical Regime Transition V1
 
 Measure the age of the current historical BTC market regime.
@@ -12,7 +12,7 @@ Research only:
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 from research.historical_market_regime import (
     classify_historical_regime,
@@ -21,6 +21,10 @@ from research.historical_market_regime import (
 
 def calculate_regime_age(
     sequence: list[dict[str, Any]],
+    classifier: Callable[
+        [dict[str, Any]],
+        str,
+    ] = classify_historical_regime,
 ) -> tuple[str, int, bool]:
     """
     Return:
@@ -39,7 +43,7 @@ def calculate_regime_age(
         )
 
     regimes = [
-        classify_historical_regime(snapshot)
+        classifier(snapshot)
         for snapshot in sequence
     ]
 
