@@ -64,6 +64,104 @@ def fetch_klines(
     return payload.get("data", [])
 
 
+def fetch_klines_range(
+    symbol: str,
+    start_time_ms: int,
+    end_time_ms: int,
+    interval: str = "15m",
+    page_limit: int = 500,
+) -> pd.DataFrame:
+    """
+    Fetch a complete historical Kline range by paging
+    backward through BingX's per-request Kline limit.
+
+    The returned DataFrame is:
+    - bounded to [start_time_ms, end_time_ms)
+    - sorted oldest -> newest
+    - deduplicated by candle Time
+    """
+
+    if start_time_ms >= end_time_ms:
+        raise ValueError(
+            "start_time_ms must be before end_time_ms"
+        )
+
+    if page_limit < 1 or page_limit > 500:
+        raise ValueError(
+            "page_limit must be between 1 and 500"
+        )
+
+    all_klines: list[dict[str, Any]] = []
+
+    current_end_ms = end_time_ms
+
+    while current_end_ms > start_time_ms:
+
+        klines = fetch_klines(
+            symbol=symbol,
+            interval=interval,
+            limit=page_limit,
+            start_time_ms=start_time_ms,
+            end_time_ms=current_end_ms,
+        )
+
+        df = klines_to_shadow_dataframe(
+            klines
+        )
+
+        if df.empty:
+            break
+
+        all_klines.extend(
+            klines
+        )
+
+        oldest_ms = int(
+            df.iloc[0]["Time"]
+        )
+
+        if oldest_ms <= start_time_ms:
+            break
+
+        next_end_ms = (
+            oldest_ms - 1
+        )
+
+        if next_end_ms >= current_end_ms:
+            raise RuntimeError(
+                "Historical Kline pagination "
+                "cursor did not move backward"
+            )
+
+        current_end_ms = next_end_ms
+
+    combined = klines_to_shadow_dataframe(
+        all_klines
+    )
+
+    if combined.empty:
+        return combined
+
+    combined = combined[
+        (combined["Time"] >= start_time_ms)
+        & (combined["Time"] < end_time_ms)
+    ].copy()
+
+    combined = (
+        combined
+        .sort_values(
+            "Time",
+            ascending=True,
+        )
+        .drop_duplicates(
+            subset=["Time"]
+        )
+        .reset_index(drop=True)
+    )
+
+    return combined
+
+
 def klines_to_shadow_dataframe(
     klines: list[dict[str, Any]],
 ) -> pd.DataFrame:
