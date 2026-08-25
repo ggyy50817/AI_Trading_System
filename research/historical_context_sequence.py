@@ -33,6 +33,120 @@ INTERVAL_MS = 15 * 60 * 1000
 KLINE_LIMIT = 100
 
 
+def build_context_sequence_from_dataframe(
+    df,
+) -> list[dict[str, Any]]:
+    """
+    Build historical BTC context snapshots from an
+    already-loaded Kline DataFrame.
+
+    Research only:
+    - No API calls
+    - Input must already be chronological historical data
+    - Output is ordered oldest -> newest
+    """
+
+    if df.empty:
+        return []
+
+    df = (
+        df.sort_values(
+            "Time",
+            ascending=True,
+        )
+        .drop_duplicates(
+            subset=["Time"]
+        )
+        .reset_index(drop=True)
+        .copy()
+    )
+
+    if len(df) < 60:
+        raise ValueError(
+            f"Insufficient historical candles: {len(df)}"
+        )
+
+    df = build_indicators(df)
+
+    sequence: list[
+        dict[str, Any]
+    ] = []
+
+    # Skip indicator warm-up rows.
+    # MA60 is currently the longest rolling indicator
+    # required by the historical context snapshot.
+    start_index = 59
+
+    for index in range(
+        start_index,
+        len(df),
+    ):
+        current = df.iloc[index]
+        previous = df.iloc[index - 1]
+
+        latest_close = float(
+            current["Close"]
+        )
+
+        ma20 = float(
+            current["MA20"]
+        )
+
+        ma60 = float(
+            current["MA60"]
+        )
+
+        atr = float(
+            current["ATR"]
+        )
+
+        volume = float(
+            current["Volume"]
+        )
+
+        volume_ma20 = float(
+            current["VolumeMA20"]
+        )
+
+        volume_ratio = float(
+            current["VolumeRatio"]
+        )
+
+        ma20_previous = float(
+            previous["MA20"]
+        )
+
+        ma20_slope = (
+            ma20 - ma20_previous
+        )
+
+        atr_pct = (
+            atr / latest_close
+            if latest_close > 0
+            else 0.0
+        )
+
+        sequence.append(
+            {
+                "candle_time_ms": int(
+                    current["Time"]
+                ),
+                "latest_close": latest_close,
+                "ma20": ma20,
+                "ma60": ma60,
+                "ma20_slope": ma20_slope,
+                "atr": atr,
+                "atr_pct": atr_pct,
+                "volume": volume,
+                "volume_ma20": volume_ma20,
+                "volume_ratio": volume_ratio,
+            }
+        )
+
+    return sequence
+
+
+
 def load_historical_context_sequence(
     timestamp: str | datetime,
     sequence_length: int = 20,
